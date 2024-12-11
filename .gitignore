@@ -1,0 +1,8 @@
+*.exe
+test*
+*.exp
+*.lib
+/.vscode
+/.vs
+temp*
+commit*
