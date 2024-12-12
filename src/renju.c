@@ -209,6 +209,7 @@ void human_vs_human(){
             display_board(board_state->chessboard,(board_state->history_actions_num-2>=0)?(board_state->history_actions[board_state->history_actions_num-2]):(NULL_ACTION),(board_state->history_actions_num-1>=0)?(board_state->history_actions[board_state->history_actions_num-1]):(NULL_ACTION));
             wprintf(L"Round %d:black's (%c %c) turn.\n",board_state->history_actions_num/2+1,BLACK_STR,BLACK_LAST_STR);
             printf("Please input the position of your chess piece, such as 'a1' or 'A1'.\n");
+            printf("value: %lld\n",evaluate_whole_board(board_state->chessboard,board_state->current_player));
             input_state=get_move_input(&i_input,&j_input);
             if (input_state)
             {
@@ -253,6 +254,7 @@ void human_vs_human(){
             display_board(board_state->chessboard,(board_state->history_actions_num-1>=0)?(board_state->history_actions[board_state->history_actions_num-1]):(NULL_ACTION),(board_state->history_actions_num-2>=0)?(board_state->history_actions[board_state->history_actions_num-2]):(NULL_ACTION));
             wprintf(L"Round %d:white's (%c %c) turn.\n",board_state->history_actions_num/2+1,WHITE_STR,WHITE_LAST_STR);
             printf("Please input the position of your chess piece, such as 'a1' or 'A1'.\n");
+            printf("value: %lld\n",evaluate_whole_board(board_state->chessboard,board_state->current_player));
             input_state=get_move_input(&i_input,&j_input);
             if (input_state)
             {

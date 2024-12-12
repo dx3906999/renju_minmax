@@ -229,6 +229,7 @@ void scan_chess_state(player_t chessboard[15][15],int i,int j,int chess_state[8]
 void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[4],player_t chessboard[15][15],int i,int j,player_t player){
     chess_shape_t advanced_chess_shape=0;
     int four_check_num=0;
+    player_t temp_chess=chessboard[i][j];
     
     for (size_t h_direction = 0; h_direction < 4; h_direction++)
     {
@@ -271,7 +272,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                         unblocked_num++;
                     }
 
-                    chessboard[i][j]=EMPTY;// 一定要改回来
+                    chessboard[i][j]=temp_chess;// 一定要改回来
                 }
                 else
                 {
@@ -321,7 +322,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                         four_check_num++;
                     }
 
-                    chessboard[i][j]=EMPTY;
+                    chessboard[i][j]=temp_chess;
                 }
                 else
                 {
@@ -399,7 +400,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                 
                 
                 case_3_end:
-                chessboard[i][j]=EMPTY;
+                chessboard[i][j]=temp_chess;
                 break;
                 
             case 2:// ^ 不可能形成一个冲四一个跳活三，只可能一个冲四一个眠三，那样的话也不用判断眠三，因其与禁手无关
@@ -427,7 +428,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                         four_check_num++;
                     }
 
-                    chessboard[i][j]=EMPTY;
+                    chessboard[i][j]=temp_chess;
 
                     chess_shape_state[h_direction]+=FOUR_HALF_S*four_check_num;
                 }
@@ -528,7 +529,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                 
 
                 case_2_three_end:
-                chessboard[i][j]=EMPTY;
+                chessboard[i][j]=temp_chess;
 
                 //TODO:TWO
                 // if (player==BLACK)
@@ -600,7 +601,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                 }
                 
                 // case_2_end:
-                chessboard[i][j]=EMPTY;
+                chessboard[i][j]=temp_chess;
                 break;
             //TODO: 
             case 1:// ^ 同理，也不可能形成一个冲四一个跳活三，那样只能是眠三（因为长连）
@@ -628,7 +629,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                         four_check_num++;
                     }
 
-                    chessboard[i][j]=EMPTY;
+                    chessboard[i][j]=temp_chess;
                     chess_shape_state[h_direction]+=FOUR_HALF_S*four_check_num;
                 }
                 else
@@ -726,7 +727,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                 
 
                 case_1_end:
-                chessboard[i][j]=EMPTY;
+                chessboard[i][j]=temp_chess;
                 break;
             
             default:
@@ -766,7 +767,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                     {
                         chess_shape_state[h_direction]+=FOUR_HALF_S;
                     }
-                    chessboard[i][j]=EMPTY;
+                    chessboard[i][j]=temp_chess;
                 }
                 else
                 {
@@ -787,7 +788,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                     {
                         chess_shape_state[h_direction]+=THREE_HALF_S;
                     }
-                    chessboard[i][j]=EMPTY;
+                    chessboard[i][j]=temp_chess;
                 }
                 else
                 {
@@ -808,7 +809,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                     {
                         chess_shape_state[h_direction]+=TWO_HALF_S;
                     }
-                    chessboard[i][j]=EMPTY;
+                    chessboard[i][j]=temp_chess;
                 }
                 else
                 {
