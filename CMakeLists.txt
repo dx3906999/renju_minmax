@@ -20,4 +20,4 @@ include_directories(${INC_DIR})
 add_executable(renju ${SRC_FILES})
 
 # Compiler flags
-target_compile_options(renju PRIVATE -Wall -O2)
+target_compile_options(renju PRIVATE -Wall -O2 -finput-charset=GBK -fexec-charset=GBK)

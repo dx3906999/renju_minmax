@@ -8,7 +8,7 @@ extern "C" {
 // #define REFEREE_DEBUG
 
 #include "global.h"
-#include "game.h"
+#include "renju.h"
 #include <stdint.h>
 
 #define OVERLINE_S UINT64_C(1)

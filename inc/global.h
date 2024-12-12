@@ -19,6 +19,8 @@ extern "C" {
 #define MAX(x,y) (((x)>(y))?(x):(y))
 #define OPS_PLAYER(player) (-(player))
 
+#define NULL_ACTION 255
+
 typedef char player_t;
 //typedef int bool;
 typedef uint8_t action_t;

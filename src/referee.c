@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "referee.h"
 #include "global.h"
-#include "game.h"
+#include "renju.h"
 
 // typedef enum chess_shape_state_t{
 //     TOOLONG=1,
@@ -21,12 +21,12 @@ int bt_depth=0;
 
 
 /**
- * @brief ç¦æ‰‹ç¨‹åºï¼Œå¯ç”¨äºé€’å½’
+ * @brief ½ûÊÖ³ÌĞò£¬¿ÉÓÃÓÚµİ¹é
  * 
  * @param chessboard 
  * @param i 
  * @param j 
- * @param h_direction_last last half direction ä¸º-1æ—¶ä¸ºçº¯ç¦æ‰‹åˆ¤æ–­ï¼Œ-2è¿”å›æ›´å¤šä¿¡æ¯
+ * @param h_direction_last last half direction Îª-1Ê±Îª´¿½ûÊÖÅĞ¶Ï£¬-2·µ»Ø¸ü¶àĞÅÏ¢
  * @return chess_shape_t 
  */
 chess_shape_t is_banned(player_t chessboard[15][15],int i,int j,int h_direction_last){
@@ -50,7 +50,7 @@ chess_shape_t is_banned(player_t chessboard[15][15],int i,int j,int h_direction_
         chess_shape_sum+=chess_shape_state[h_direction];
     }
     
-    /* if (GET_SHAPE_S(chess_shape_sum,FIVE_S))// å¾—å’Œä¸€èˆ¬çš„åŒºåˆ†ï¼Ÿ
+    /* if (GET_SHAPE_S(chess_shape_sum,FIVE_S))// µÃºÍÒ»°ãµÄÇø·Ö£¿
     {
         return false;
     }
@@ -162,7 +162,7 @@ void scan_chess_state(player_t chessboard[15][15],int i,int j,int chess_state[8]
     {
         empty_index=1;
         connected_index=0;
-        chess_state_index=0;// äº‹å®ä¸Šï¼Œè¿™ä¸ªæ²¡ä»€ä¹ˆç”¨
+        chess_state_index=0;// ÊÂÊµÉÏ£¬Õâ¸öÃ»Ê²Ã´ÓÃ
         // block_num=0;
         // connection_state=1;
         // chess_state_index=0;
@@ -232,7 +232,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
     
     for (size_t h_direction = 0; h_direction < 4; h_direction++)
     {
-        if (chess_state[h_direction*2][0]>=0&&chess_state[h_direction*2+1][0]>=0)// ä¸¤è¾¹éƒ½æ²¡æœ‰block
+        if (chess_state[h_direction*2][0]>=0&&chess_state[h_direction*2+1][0]>=0)// Á½±ß¶¼Ã»ÓĞblock
         {
 
             switch (chess_state[h_direction*2][0]+chess_state[h_direction*2+1][0]+1)
@@ -254,7 +254,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                 return;
                 break;
 
-            case 4:// å¦‚æœå•çº¯ç¦æ‰‹çš„è¯ï¼Œåªéœ€è¦ä¸æ˜¯æ­»å››å°±è¡Œ
+            case 4:// Èç¹ûµ¥´¿½ûÊÖµÄ»°£¬Ö»ĞèÒª²»ÊÇËÀËÄ¾ÍĞĞ
                 int unblocked_num=0;
 
                 if (player==BLACK)
@@ -271,7 +271,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                         unblocked_num++;
                     }
 
-                    chessboard[i][j]=EMPTY;// ä¸€å®šè¦æ”¹å›æ¥
+                    chessboard[i][j]=EMPTY;// Ò»¶¨Òª¸Ä»ØÀ´
                 }
                 else
                 {
@@ -340,7 +340,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
 
                 if (player==BLACK)
                 {
-                    chessboard[i][j]=player;// ç”±äºæ´»å››åªèƒ½æ˜¯ eOOOOe ï¼Œåˆ™åªéœ€è¦åˆ¤æ–­ä¸´è¿‘ç©ºä½è½å­åæ˜¯å¦ä¸ºæ´»å››
+                    chessboard[i][j]=player;// ÓÉÓÚ»îËÄÖ»ÄÜÊÇ eOOOOe £¬ÔòÖ»ĞèÒªÅĞ¶ÏÁÙ½ü¿ÕÎ»Âä×ÓºóÊÇ·ñÎª»îËÄ
                     if (chess_state[h_direction*2][1]>=1&&chess_state[h_direction*2+1][1]>=1)//THREE_OPEN_S
                     {
                         chess_shape_t advanced_chess_shape=0;
@@ -402,7 +402,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                 chessboard[i][j]=EMPTY;
                 break;
                 
-            case 2:// ^ ä¸å¯èƒ½å½¢æˆä¸€ä¸ªå†²å››ä¸€ä¸ªè·³æ´»ä¸‰ï¼Œåªå¯èƒ½ä¸€ä¸ªå†²å››ä¸€ä¸ªçœ ä¸‰ï¼Œé‚£æ ·çš„è¯ä¹Ÿä¸ç”¨åˆ¤æ–­çœ ä¸‰ï¼Œå› å…¶ä¸ç¦æ‰‹æ— å…³
+            case 2:// ^ ²»¿ÉÄÜĞÎ³ÉÒ»¸ö³åËÄÒ»¸öÌø»îÈı£¬Ö»¿ÉÄÜÒ»¸ö³åËÄÒ»¸öÃßÈı£¬ÄÇÑùµÄ»°Ò²²»ÓÃÅĞ¶ÏÃßÈı£¬ÒòÆäÓë½ûÊÖÎŞ¹Ø
                 four_check_num=0;
 
                 //FOUR
@@ -462,7 +462,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                 }
                 
 
-                //TODO: ä¸‰çš„åˆ¤æ–­ï¼Œå³æ˜¯å¦ä¸ºè·³ä¸‰
+                //TODO: ÈıµÄÅĞ¶Ï£¬¼´ÊÇ·ñÎªÌøÈı
                 if (player==BLACK)
                 {
                     chessboard[i][j]=player;
@@ -533,7 +533,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                 //TODO:TWO
                 // if (player==BLACK)
                 // {
-                //     // ^ æœ‰å¿…è¦å—
+                //     // ^ ÓĞ±ØÒªÂğ
                 //     chessboard[i][j]=player;
                 //     if (chess_state[h_direction*2][1]>0&&chess_state[h_direction*2+1][1]>0)
                 //     {
@@ -603,7 +603,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                 chessboard[i][j]=EMPTY;
                 break;
             //TODO: 
-            case 1:// ^ åŒç†ï¼Œä¹Ÿä¸å¯èƒ½å½¢æˆä¸€ä¸ªå†²å››ä¸€ä¸ªè·³æ´»ä¸‰ï¼Œé‚£æ ·åªèƒ½æ˜¯çœ ä¸‰ï¼ˆå› ä¸ºé•¿è¿ï¼‰
+            case 1:// ^ Í¬Àí£¬Ò²²»¿ÉÄÜĞÎ³ÉÒ»¸ö³åËÄÒ»¸öÌø»îÈı£¬ÄÇÑùÖ»ÄÜÊÇÃßÈı£¨ÒòÎª³¤Á¬£©
                 four_check_num=0;
 
                 //FOUR
@@ -656,7 +656,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                     
                 }
                 
-                //TODO: è·³ä¸‰åˆ¤æ–­
+                //TODO: ÌøÈıÅĞ¶Ï
 
                 if (player==BLACK)
                 {
@@ -703,10 +703,10 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                         }
                         else if (chess_state[h_direction*2][3]>0&&chess_state[h_direction*2+1][1]>0)
                         {
-                            chess_shape_state[h_direction]+=THREE_OPEN_S;// ^ è¿™é‡Œå­˜ç–‘ eOOeOeOOe ï¼Œç”±ä¸‹é¢ä¿®æ­£
+                            chess_shape_state[h_direction]+=THREE_OPEN_S;// ^ ÕâÀï´æÒÉ eOOeOeOOe £¬ÓÉÏÂÃæĞŞÕı
                         }
                     }
-                    else if (chess_state[h_direction*2+1][1]==1&&chess_state[h_direction*2+1][2]==2)// ^ è¿™ä¸ªelseå¿…é¡»åŠ ï¼Œè¿›è¡Œ THREE_OPEN_S çš„ä¿®æ­£
+                    else if (chess_state[h_direction*2+1][1]==1&&chess_state[h_direction*2+1][2]==2)// ^ Õâ¸öelse±ØĞë¼Ó£¬½øĞĞ THREE_OPEN_S µÄĞŞÕı
                     {
                         if ((chess_state[h_direction*2+1][3]==-1&&chess_state[h_direction*2][1]>0)||(chess_state[h_direction*2+1][3]>0&&chess_state[h_direction*2][1]==-1))
                         {
@@ -720,9 +720,9 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                     
                 }
                 
-                //^ è·³2åˆ¤æ–­
+                //^ Ìø2ÅĞ¶Ï
 
-                //^ å…ˆä¸ç»™åˆ†çœ‹çœ‹
+                //^ ÏÈ²»¸ø·Ö¿´¿´
                 
 
                 case_1_end:
@@ -742,7 +742,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
         {
             continue;
         }
-        else// æœ‰ä¸€è¾¹æœ‰block
+        else// ÓĞÒ»±ßÓĞblock
         {
             int direction_unblocked=0;
             direction_unblocked=(chess_state[h_direction*2][0]==-1)?(h_direction*2+1):(h_direction*2);
@@ -881,22 +881,22 @@ bool chessboard_is_full(player_t chessboard_data[15][15]){
 
 
 /**
- * @brief åˆ¤æ–­å½“å‰å±€é¢è¾“èµ¢ï¼Œä¸åŒ…å«ä¸‹æ»¡æ£‹ç›˜çš„æƒ…å†µ
+ * @brief ÅĞ¶Ïµ±Ç°¾ÖÃæÊäÓ®£¬²»°üº¬ÏÂÂúÆåÅÌµÄÇé¿ö
  * 
  * @param chessboard_data 
  * @param player 
  * @param i 
  * @param j 
- * @return int ç»§ç»­ä¸‹ä¸º0ï¼Œä¸€æ–¹è·èƒœä¸º1ï¼Œé»‘æ–¹ç¦æ‰‹ä¸º2
+ * @return int ¼ÌĞøÏÂÎª0£¬Ò»·½»ñÊ¤Îª1£¬ºÚ·½½ûÊÖÎª2
  */
 int is_winner(player_t chessboard_data[15][15],player_t player,int i,int j){
     int result;
     int ban_state=0;
-    if (player==WHITE)  // ç™½æ£‹æ— ç¦æ‰‹
+    if (player==WHITE)  // °×ÆåÎŞ½ûÊÖ
     {
         result=is_five(chessboard_data,player,i,j);
     }
-    else  // é»‘æ£‹è€ƒè™‘ç¦æ‰‹
+    else  // ºÚÆå¿¼ÂÇ½ûÊÖ
     {
         ban_state=is_banned(chessboard_data,i,j,-1);
         if (ban_state)

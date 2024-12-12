@@ -15,7 +15,7 @@ struct State
     player_t current_player;
     action_t history_actions[CHESSBOARD_SIZE];
     int history_actions_num;
-    bool actions_unavailable[CHESSBOARD_SIZE];
+    // bool actions_unavailable[CHESSBOARD_SIZE];
 };
 
 State* init_state();
