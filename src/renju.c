@@ -52,7 +52,7 @@ int main(int argc, char const *argv[])
         char ch;
         printf("%s\n", RENJU_BANNER);
         printf("1.pvp\n2.pve(black ai)\n3.pve(white ai)\n4.quit\n");
-        scanf_s("%d",&mode_choice);
+        scanf("%d",&mode_choice);
         while((ch = getchar()) != '\n' && ch != EOF);
         switch (mode_choice)
         {
@@ -82,11 +82,11 @@ void display_board(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], action_t
     {
         if (i<=5)
         {
-            printf("%lld ",CHESSBOARD_LEN-i);
+            printf("%u ",(unsigned int)(CHESSBOARD_LEN-i));
         }
         else
         {
-            printf("%lld  ",CHESSBOARD_LEN-i);
+            printf("%u  ",(unsigned int)(CHESSBOARD_LEN-i));
         }
         
         
@@ -126,7 +126,7 @@ bool get_move_input(int* i, int* j){
     int y_int=0;
     char ch;
 
-    scanf_s("%c", &ch);
+    scanf("%c", &ch);
     ch=(char)toupper(ch);
     if (ch=='Q')
     {
@@ -145,7 +145,7 @@ bool get_move_input(int* i, int* j){
     else if (ch>='A'&&ch<='O')
     {
         *j=(int)(ch-'A');
-        scanf_s("%d",&y_int);
+        scanf("%d",&y_int);
         while((ch = getchar()) != '\n' && ch != EOF);//clear the buffer
 
         if (y_int>0&&y_int<=15)
