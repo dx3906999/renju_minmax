@@ -3,7 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <signal.h>
-
+#include "evaluate.h"
 #include "global.h"
 #include "game.h"
 //#include "mcts.h"
@@ -88,7 +88,7 @@ int main(int argc, char const *argv[])
             //human_vs_ai(BLACK);
             break;
         case 3:
-            //human_vs_ai(WHITE);
+            human_vs_ai_white();
             break;
         case 4:
             train();
@@ -306,7 +306,8 @@ void human_vs_human(){
     int is_winner_state=0;
     int i_input;
     int j_input;
-    
+    value_t score_board[15][15]={0};
+
     while (1)
     {
         round++;
@@ -329,6 +330,10 @@ void human_vs_human(){
                     j_current=j_input;
                     update_global_chessboard_data_one_step();
                     update_chessboard_str();
+
+                    evaluate_board(global_chessboard_data,WHITE,score_board);
+                    display_score_board(score_board);
+
                     is_winner_state=is_winner(global_chessboard_data,BLACK,i_black_last,j_black_last);
                     if (is_winner_state==2)
                     {
@@ -382,6 +387,10 @@ void human_vs_human(){
                     j_current=j_input;
                     update_global_chessboard_data_one_step();
                     update_chessboard_str();
+
+                    evaluate_board(global_chessboard_data,BLACK,score_board);
+                    display_score_board(score_board);
+
                     if (is_winner(global_chessboard_data,WHITE,i_white_last,j_white_last))
                     {
                         printf("White won!\n");
@@ -415,111 +424,111 @@ void human_vs_human(){
     
 }
 
-//void human_vs_ai(player_t human_player){
-//    printf("\x1b[0m\x1b[1;32mHuman vs AI mode.\n\x1b[0m");
-//    printf("%s is black and %s is white.\n",BLACK_STR,WHITE_STR);
-//    int round=0;
-//    bool state=true;
-//    int is_winner_state=0;
-//    int i_input;
-//    int j_input;
-//    int i_ai;
-//    int j_ai;
-//
-//    while (human_player==BLACK)
-//    {
-//        round++;
-//        
-//        do
-//        {
-//            current_player=BLACK;
-//            print_chessboard();
-//            printf("Round %d:black's (%s %s) turn.\n",round,BLACK_STR,BLACK_LAST_STR);
-//            printf("Please input the position of your chess piece, such as 'a1' or 'A1'.\n");
-//            state=get_move_input(&i_input,&j_input);
-//            if (state)
-//            {
-//                state=check_move_input_is_valid(global_chessboard_data,i_input,j_input);
-//                if (state)
-//                {
-//                    i_black_last=i_input;
-//                    j_black_last=j_input;
-//                    i_current=i_input;
-//                    j_current=j_input;
-//                    update_global_chessboard_data_one_step();
-//                    // update_chessboard_str();
-//                    is_winner_state=is_winner(global_chessboard_data,BLACK,i_black_last,j_black_last);
-//                    if (is_winner_state==2)
-//                    {
-//                        update_chessboard_str();
-//                        printf("Black lost!\n");
-//                        print_chessboard();
-//                        return;
-//                    }
-//                    else if (is_winner_state==1)
-//                    {
-//                        update_chessboard_str();
-//                        printf("Black won!\n");
-//                        print_chessboard();
-//                        return;
-//                    }
-//                    else if (chessboard_is_full(global_chessboard_data))
-//                    {
-//                        update_chessboard_str();
-//                        printf("The chessboard is full!\nTie.\n");
-//                        print_chessboard();
-//                        return;
-//                    }
-//                    
-//                    
-//                }
-//                else
-//                {
-//                    printf("please enter a valid input.\n");
-//                }
-//                
-//                
-//            }
-//            
-//
-//        } while (!state);
-//
-//        printf("Round %d:white's (%s %s) turn.\n",round,WHITE_STR,WHITE_LAST_STR);
-//        //printf("Please input the position of your chess piece, such as 'a1' or 'A1'.\n");
-//        mcts(global_chessboard_data,80000,10000,WHITE,&i_ai,&j_ai);
-//        current_player=WHITE;
-//        i_current=i_ai;
-//        j_current=j_ai;
-//        i_white_last=i_ai;
-//        j_white_last=j_ai;
-//        update_global_chessboard_data_one_step();
-//        update_chessboard_str();
-//        if (is_winner(global_chessboard_data,WHITE,i_white_last,j_white_last))
-//        {
-//            printf("White won!\n");
-//            print_chessboard();
-//            return;
-//        }
-//        else if (chessboard_is_full(global_chessboard_data))
-//        {
-//            printf("The chessboard is full!\nTie.\n");
-//            print_chessboard();
-//            return;
-//        }
-//
-//        
-//
-//    }
-//    
-//
-//}
-void train(){
+void human_vs_ai_white(){
+    printf("\x1b[0m\x1b[1;32mHuman vs Human mode.\n\x1b[0m");
+    printf("%s is black and %s is white.\n",BLACK_STR,WHITE_STR);
+    int round=0;
+    bool state=true;
+    int is_winner_state=0;
+    int i_input;
+    int j_input;
+    value_t score_board[15][15]={0};
 
+    while (1)
+    {
+        round++;
+        
+        do
+        {
+            current_player=BLACK;
+            print_chessboard();
+            printf("Round %d:black's (%s %s) turn.\n",round,BLACK_STR,BLACK_LAST_STR);
+            printf("Please input the position of your chess piece, such as 'a1' or 'A1'.\n");
+            state=get_move_input(&i_input,&j_input);
+            if (state)
+            {
+                state=check_move_input_is_valid(global_chessboard_data,i_input,j_input);
+                if (state)
+                {
+                    i_black_last=i_input;
+                    j_black_last=j_input;
+                    i_current=i_input;
+                    j_current=j_input;
+                    update_global_chessboard_data_one_step();
+                    update_chessboard_str();
+
+                    evaluate_board(global_chessboard_data,WHITE,score_board);
+                    display_score_board(score_board);
+
+                    is_winner_state=is_winner(global_chessboard_data,BLACK,i_black_last,j_black_last);
+                    if (is_winner_state==2)
+                    {
+                        printf("Black lost!\n");
+                        print_chessboard();
+                        return;
+                    }
+                    else if (is_winner_state==1)
+                    {
+                        printf("Black win!\n");
+                        print_chessboard();
+                        return;
+                    }
+                    else if (chessboard_is_full(global_chessboard_data))
+                    {
+                        printf("The chessboard is full!\nTie.\n");
+                        print_chessboard();
+                        return;
+                    }
+                    
+                    
+                }
+                else
+                {
+                    printf("please enter a valid input.\n");
+                }
+                
+                
+            }
+            
+
+        } while (!state);
+
+
+
+        {
+            current_player=WHITE;
+            print_chessboard();
+            printf("Round %d:white's (%s %s) turn.\n",round,WHITE_STR,WHITE_LAST_STR);
+            
+            evaluate_board(global_chessboard_data,WHITE,score_board);
+            choose_max_score_pos(score_board,&i_current,&j_current);
+            i_white_last=i_current;
+            j_white_last=j_current;
+            update_global_chessboard_data_one_step();
+            update_chessboard_str();
+            is_winner_state=is_winner(global_chessboard_data,BLACK,i_white_last,j_white_last);
+            if (is_winner_state==2)
+            {
+                printf("Black lost!\n");
+                print_chessboard();
+                return;
+            }
+            else if (is_winner_state==1)
+            {
+                printf("Black win!\n");
+                print_chessboard();
+                return;
+            }
+            else if (chessboard_is_full(global_chessboard_data))
+            {
+                printf("The chessboard is full!\nTie.\n");
+                print_chessboard();
+                return;
+            }
+        }
+
+    }
+    
 }
 
-// i_white_last
-
-//void self_play() {
-//
-//}
 

@@ -11,18 +11,18 @@ extern "C" {
 #include "game.h"
 #include <stdint.h>
 
-#define OVERLINE_S 1
-#define FIVE_S (1<<(4*1))
-#define DEAD_S (1<<(4*2))
-#define FOUR_HALF_S (1<<(4*3))
-#define FOUR_OPEN_S (1<<(4*4))
-#define THREE_HALF_S (1<<(4*5))
-#define THREE_OPEN_S (1<<(4*6))
-#define TWO_HALF_S (1<<(4*7))
-#define TWO_OPEN_S (1<<(4*8))
-#define ONE_HALF_S (1<<(4*9))
-#define ONE_OPEN_S (1<<(4*10))
-#define TRUE_S (1<<(sizeof(chess_shape_t)*8-1))
+#define OVERLINE_S UINT64_C(1)
+#define FIVE_S (UINT64_C(1)<<(4*1))
+#define DEAD_S (UINT64_C(1)<<(4*2))
+#define FOUR_HALF_S (UINT64_C(1)<<(4*3))
+#define FOUR_OPEN_S (UINT64_C(1)<<(4*4))
+#define THREE_HALF_S (UINT64_C(1)<<(4*5))
+#define THREE_OPEN_S (UINT64_C(1)<<(4*6))
+#define TWO_HALF_S (UINT64_C(1)<<(4*7))
+#define TWO_OPEN_S (UINT64_C(1)<<(4*8))
+// #define ONE_HALF_S (1<<(4*9))
+// #define ONE_OPEN_S (1<<(4*10))
+#define TRUE_S (UINT64_C(1)<<(sizeof(chess_shape_t)*8-1))
 #define FALSE_S 0
 #define GET_SHAPE_S(chess_shape_s,std_shape_s) (((chess_shape_s)&((std_shape_s)|((std_shape_s)<<1)|((std_shape_s)<<2)|((std_shape_s)<<3)))/(std_shape_s))
 #define GET_TF_S(chess_shape_s) ((chess_shape_s)>>(sizeof(chess_shape_t)*8-1))

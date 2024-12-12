@@ -30,6 +30,7 @@ int bt_depth=0;
  * @return chess_shape_t 
  */
 chess_shape_t is_banned(player_t chessboard[15][15],int i,int j,int h_direction_last){
+    
     int chess_state[8][15]={0};
     chess_shape_t chess_shape_state[4]={0};
     int chess_shape_sum=0;
@@ -256,19 +257,38 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
             case 4:// 如果单纯禁手的话，只需要不是死四就行
                 int unblocked_num=0;
 
-                chessboard[i][j]=player;
-
-                if (chess_state[h_direction*2][1]>0&&(!is_banned(chessboard,i+i_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),j+j_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),-1)))
+                if (player==BLACK)
                 {
-                    unblocked_num++;
-                }
+                    chessboard[i][j]=player;
 
-                if (chess_state[h_direction*2+1][1]>0&&(!is_banned(chessboard,i+i_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),j+j_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),-1)))
+                    if (chess_state[h_direction*2][1]>0&&(!is_banned(chessboard,i+i_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),j+j_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),-1)))
+                    {
+                        unblocked_num++;
+                    }
+
+                    if (chess_state[h_direction*2+1][1]>0&&(!is_banned(chessboard,i+i_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),j+j_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),-1)))
+                    {
+                        unblocked_num++;
+                    }
+
+                    chessboard[i][j]=EMPTY;// 一定要改回来
+                }
+                else
                 {
-                    unblocked_num++;
-                }
+                    if (chess_state[h_direction*2][1]>0)
+                    {
+                        unblocked_num++;
+                    }
 
-                chessboard[i][j]=EMPTY;// 一定要改回来
+                    if (chess_state[h_direction*2+1][1]>0)
+                    {
+                        unblocked_num++;
+                    }
+                    
+                    
+                }
+                
+                
 
                 switch (unblocked_num)
                 {
@@ -288,41 +308,94 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
             case 3:
                 four_check_num=0;
 
-                chessboard[i][j]=player;
-
-                if (chess_state[h_direction*2][1]==1&&chess_state[h_direction*2][2]==1&&(!is_banned(chessboard,i+i_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),j+j_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),-1)))
+                if (player==BLACK)
                 {
-                    four_check_num++;
-                }
-                if (chess_state[h_direction*2+1][1]==1&&chess_state[h_direction*2+1][2]==1&&(!is_banned(chessboard,i+i_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),j+j_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),-1)))
-                {
-                    four_check_num++;
-                }
+                    chessboard[i][j]=player;
 
-                chessboard[i][j]=EMPTY;
+                    if (chess_state[h_direction*2][1]==1&&chess_state[h_direction*2][2]==1&&(!is_banned(chessboard,i+i_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),j+j_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),-1)))
+                    {
+                        four_check_num++;
+                    }
+                    if (chess_state[h_direction*2+1][1]==1&&chess_state[h_direction*2+1][2]==1&&(!is_banned(chessboard,i+i_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),j+j_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),-1)))
+                    {
+                        four_check_num++;
+                    }
+
+                    chessboard[i][j]=EMPTY;
+                }
+                else
+                {
+                    if (chess_state[h_direction*2][1]==1&&chess_state[h_direction*2][2]==1)
+                    {
+                        four_check_num++;
+                    }
+                    if (chess_state[h_direction*2+1][1]==1&&chess_state[h_direction*2+1][2]==1)
+                    {
+                        four_check_num++;
+                    }
+                    
+                }
 
                 chess_shape_state[h_direction]+=FOUR_HALF_S*four_check_num;
 
-                chessboard[i][j]=player;// 由于活四只能是 eOOOOe ，则只需要判断临近空位落子后是否为活四
-                if (chess_state[h_direction*2][1]>=1&&chess_state[h_direction*2+1][1]>=1)
+                if (player==BLACK)
                 {
-                    chess_shape_t advanced_chess_shape=0;
-                    
-                    advanced_chess_shape=is_banned(chessboard,i+i_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),j+j_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),h_direction);
-                    if (GET_SHAPE_S(advanced_chess_shape,FOUR_OPEN_S)&&(!GET_TF_S(advanced_chess_shape)))
+                    chessboard[i][j]=player;// 由于活四只能是 eOOOOe ，则只需要判断临近空位落子后是否为活四
+                    if (chess_state[h_direction*2][1]>=1&&chess_state[h_direction*2+1][1]>=1)//THREE_OPEN_S
                     {
-                        chess_shape_state[h_direction]+=THREE_OPEN_S;
-                        goto case_3_end;
+                        chess_shape_t advanced_chess_shape=0;
+
+                        advanced_chess_shape=is_banned(chessboard,i+i_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),j+j_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),h_direction);
+                        if (GET_SHAPE_S(advanced_chess_shape,FOUR_OPEN_S)&&(!GET_TF_S(advanced_chess_shape)))
+                        {
+                            chess_shape_state[h_direction]+=THREE_OPEN_S;
+                            goto case_3_end;
+                        }
+                        advanced_chess_shape=is_banned(chessboard,i+i_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),j+j_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),h_direction);
+                        if (GET_SHAPE_S(advanced_chess_shape,FOUR_OPEN_S)&&(!GET_TF_S(advanced_chess_shape)))
+                        {
+                            chess_shape_state[h_direction]+=THREE_OPEN_S;
+                            goto case_3_end;
+                        }
+
                     }
-                    advanced_chess_shape=is_banned(chessboard,i+i_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),j+j_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),h_direction);
-                    if (GET_SHAPE_S(advanced_chess_shape,FOUR_OPEN_S)&&(!GET_TF_S(advanced_chess_shape)))
+                    else if (chess_state[h_direction*2][1]>=1&&chess_state[h_direction*2+1][1]==-1)//THREE_HALF_S
                     {
-                        chess_shape_state[h_direction]+=THREE_OPEN_S;
-                        goto case_3_end;
+                        advanced_chess_shape=0;
+                        advanced_chess_shape=is_banned(chessboard,i+i_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),j+j_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),h_direction);
+                        if (GET_SHAPE_S(advanced_chess_shape,FOUR_OPEN_S)&&(!GET_TF_S(advanced_chess_shape)))
+                        {
+                            chess_shape_state[h_direction]+=THREE_HALF_S;
+                            goto case_3_end;
+                        }
+                        
+                    }
+                    else if (chess_state[h_direction*2][1]==-1&&chess_state[h_direction*2+1][1]>=1)//THREE_HALF_S
+                    {
+                        advanced_chess_shape=0;
+                        advanced_chess_shape=is_banned(chessboard,i+i_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),j+j_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),h_direction);
+                        if (GET_SHAPE_S(advanced_chess_shape,FOUR_OPEN_S)&&(!GET_TF_S(advanced_chess_shape)))
+                        {
+                            chess_shape_state[h_direction]+=THREE_HALF_S;
+                            goto case_3_end;
+                        }
                     }
                     
                     
                 }
+                else
+                {
+                    if (chess_state[h_direction*2][1]>=1&&chess_state[h_direction*2+1][1]>=1)
+                    {
+                        chess_shape_state[h_direction]+=THREE_OPEN_S;
+                    }
+                    else if ((chess_state[h_direction*2][1]>=1&&chess_state[h_direction*2+1][1]==-1)||(chess_state[h_direction*2][1]==-1&&chess_state[h_direction*2+1][1]>=1))
+                    {
+                        chess_shape_state[h_direction]+=THREE_HALF_S;
+                    }
+                    
+                }
+                
                 
                 
                 case_3_end:
@@ -332,109 +405,325 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
             case 2:// ^ 不可能形成一个冲四一个跳活三，只可能一个冲四一个眠三，那样的话也不用判断眠三，因其与禁手无关
                 four_check_num=0;
 
-                chessboard[i][j]=player;
-
-                if (
-                    chess_state[h_direction*2][1]==1 &&
-                    chess_state[h_direction*2][2]==2 &&
-                    (!is_banned(chessboard,i+i_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),j+j_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),-1))
-                )
+                //FOUR
+                if (player==BLACK)
                 {
-                    four_check_num++;
-                }
-                if (
-                    chess_state[h_direction*2+1][1]==1 &&
-                    chess_state[h_direction*2+1][2]==2 &&
-                    (!is_banned(chessboard,i+i_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),j+j_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),-1))
-                )
-                {
-                    four_check_num++;
-                }
+                    chessboard[i][j]=player;
 
+                    if (
+                        chess_state[h_direction*2][1]==1 &&
+                        chess_state[h_direction*2][2]==2 &&
+                        (!is_banned(chessboard,i+i_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),j+j_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),-1))
+                    )
+                    {
+                        four_check_num++;
+                    }
+                    if (
+                        chess_state[h_direction*2+1][1]==1 &&
+                        chess_state[h_direction*2+1][2]==2 &&
+                        (!is_banned(chessboard,i+i_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),j+j_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),-1))
+                    )
+                    {
+                        four_check_num++;
+                    }
+
+                    chessboard[i][j]=EMPTY;
+
+                    chess_shape_state[h_direction]+=FOUR_HALF_S*four_check_num;
+                }
+                else
+                {
+                    if (
+                        chess_state[h_direction*2][1]==1 &&
+                        chess_state[h_direction*2][2]==2 
+                    )
+                    {
+                        four_check_num++;
+                    }
+                    if (
+                        chess_state[h_direction*2+1][1]==1 &&
+                        chess_state[h_direction*2+1][2]==2 
+                    )
+                    {
+                        four_check_num++;
+                    }
+
+                    switch (four_check_num)
+                    {
+                    case 2:
+                        chess_shape_state[h_direction]+=FOUR_OPEN_S;
+                        break;
+                    case 1:
+                        chess_shape_state[h_direction]+=FOUR_HALF_S;
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                
+
+                //TODO: 三的判断，即是否为跳三
+                if (player==BLACK)
+                {
+                    chessboard[i][j]=player;
+                    if (chess_state[h_direction*2][1]==1&&chess_state[h_direction*2][2]==1)
+                    {
+                        advanced_chess_shape=is_banned(chessboard,i+i_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),j+j_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),h_direction);
+                        if (GET_SHAPE_S(advanced_chess_shape,FOUR_OPEN_S)&&(!GET_TF_S(advanced_chess_shape)))
+                        {
+                            chess_shape_state[h_direction]+=THREE_OPEN_S;
+                            goto case_2_three_end;
+                        }
+                        else if (GET_SHAPE_S(advanced_chess_shape,FOUR_HALF_S)&&(!GET_TF_S(advanced_chess_shape)))
+                        {
+                            chess_shape_state[h_direction]+=THREE_HALF_S;
+                            goto case_2_three_end;
+                        }
+                        
+
+                    }
+                    if (chess_state[h_direction*2+1][1]==1&&chess_state[h_direction*2+1][2]==1)
+                    {
+                        advanced_chess_shape=is_banned(chessboard,i+i_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),j+j_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),h_direction);
+                        if (GET_SHAPE_S(advanced_chess_shape,FOUR_OPEN_S)&&(!GET_TF_S(advanced_chess_shape)))
+                        {
+                            chess_shape_state[h_direction]+=THREE_OPEN_S;
+                            goto case_2_three_end;
+                        }
+                        else if (GET_SHAPE_S(advanced_chess_shape,FOUR_HALF_S)&&(!GET_TF_S(advanced_chess_shape)))
+                        {
+                            chess_shape_state[h_direction]+=THREE_HALF_S;
+                            goto case_2_three_end;
+                        }
+                        
+
+                    }
+                
+                }
+                else
+                {
+                    if (chess_state[h_direction*2][1]==1&&chess_state[h_direction*2][2]==1)
+                    {
+                        if ((chess_state[h_direction*2][3]==-1&&chess_state[h_direction*2+1][1]>0)||(chess_state[h_direction*2][3]>0&&chess_state[h_direction*2+1][1]==-1))
+                        {
+                            chess_shape_state[h_direction]+=THREE_HALF_S;
+                        }
+                        else if (chess_state[h_direction*2][3]>0&&chess_state[h_direction*2+1][1]>0)
+                        {
+                            chess_shape_state[h_direction]+=THREE_OPEN_S;
+                        }
+                    }
+                    else if (chess_state[h_direction*2+1][1]==1&&chess_state[h_direction*2+1][2]==1)
+                    {
+                        if ((chess_state[h_direction*2+1][3]==-1&&chess_state[h_direction*2][1]>0)||(chess_state[h_direction*2+1][3]>0&&chess_state[h_direction*2][1]==-1))
+                        {
+                            chess_shape_state[h_direction]+=THREE_HALF_S;
+                        }
+                        else if (chess_state[h_direction*2+1][3]>0&&chess_state[h_direction*2][1]>0)
+                        {
+                            chess_shape_state[h_direction]+=THREE_OPEN_S;
+                        }
+                    }
+                }
+                
+
+                case_2_three_end:
                 chessboard[i][j]=EMPTY;
-                
-                chess_shape_state[h_direction]+=FOUR_HALF_S*four_check_num;
 
-                //TODO: 活三判断，即是否为跳活三
-                chessboard[i][j]=player;
-                // chess_shape_t advanced_chess_shape=0;
-                if (chess_state[h_direction*2][1]==1&&chess_state[h_direction*2][2]==1)
-                {
-                    advanced_chess_shape=is_banned(chessboard,i+i_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),j+j_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),h_direction);
-                    if (GET_SHAPE_S(advanced_chess_shape,FOUR_OPEN_S)&&(!GET_TF_S(advanced_chess_shape)))
-                    {
-                        chess_shape_state[h_direction]+=THREE_OPEN_S;
-                        goto case_2_end;
-                    }
+                //TODO:TWO
+                // if (player==BLACK)
+                // {
+                //     // ^ 有必要吗
+                //     chessboard[i][j]=player;
+                //     if (chess_state[h_direction*2][1]>0&&chess_state[h_direction*2+1][1]>0)
+                //     {
+                //         advanced_chess_shape=is_banned(chessboard,i+i_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),j+j_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),h_direction);
+                //         if (GET_SHAPE_S(advanced_chess_shape,THREE_OPEN_S)&&(!GET_TF_S(advanced_chess_shape)))
+                //         {
+                //             chess_shape_state[h_direction]+=TWO_OPEN_S;
+                //             goto case_2_end;
+                //         }
+                //         else if (GET_SHAPE_S(advanced_chess_shape,THREE_HALF_S)&&(!GET_TF_S(advanced_chess_shape)))
+                //         {
+                //             chess_shape_state[h_direction]+=TWO_HALF_S;
+                //             goto case_2_end;
+                //         }
+                        
+                //         advanced_chess_shape=is_banned(chessboard,i+i_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),j+j_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),h_direction);
+                //         if (GET_SHAPE_S(advanced_chess_shape,THREE_OPEN_S)&&(!GET_TF_S(advanced_chess_shape)))
+                //         {
+                //             chess_shape_state[h_direction]+=TWO_OPEN_S;
+                //             goto case_2_end;
+                //         }
+                //         else if (GET_SHAPE_S(advanced_chess_shape,THREE_HALF_S)&&(!GET_TF_S(advanced_chess_shape)))
+                //         {
+                //             chess_shape_state[h_direction]+=TWO_HALF_S;
+                //             goto case_2_end;
+                //         }
+                        
+                //     }
+                //     else if (chess_state[h_direction*2][1]>0&&chess_state[h_direction*2+1][1]==-1&&!is_banned(chessboard,i+i_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),j+j_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),-1))
+                //     {
+                //         chess_shape_state[h_direction]+=TWO_HALF_S;
+                //         goto case_2_end;
+                //     }
+                //     else if (chess_state[h_direction*2][1]==-1&&chess_state[h_direction*2+1][1]>0&&!is_banned(chessboard,i+i_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),j+j_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),-1))
+                //     {
+                //         chess_shape_state[h_direction]+=TWO_HALF_S;
+                //         goto case_2_end;
+                //     }
                     
+                    
+                    
+                // }
+                // else
+                // {
+                //     if (chess_state[h_direction*2][1]>0&&chess_state[h_direction*2+1][1]>0)
+                //     {
+                //         chess_shape_state[h_direction]+=TWO_OPEN_S;
+                //     }
+                //     else if ((chess_state[h_direction*2][1]>=1&&chess_state[h_direction*2+1][1]==-1)||(chess_state[h_direction*2][1]==-1&&chess_state[h_direction*2+1][1]>=1))
+                //     {
+                //         chess_shape_state[h_direction]+=TWO_HALF_S;
+                //     }
+                    
+                    
+                // }
+
+                if (chess_state[h_direction*2][1]>0&&chess_state[h_direction*2+1][1]>0)
+                {
+                    chess_shape_state[h_direction]+=TWO_OPEN_S;
                 }
-                if (chess_state[h_direction*2+1][1]==1&&chess_state[h_direction*2+1][2]==1)
+                else if ((chess_state[h_direction*2][1]>=1&&chess_state[h_direction*2+1][1]==-1)||(chess_state[h_direction*2][1]==-1&&chess_state[h_direction*2+1][1]>=1))
                 {
-                    advanced_chess_shape=is_banned(chessboard,i+i_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),j+j_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),h_direction);
-                    if (GET_SHAPE_S(advanced_chess_shape,FOUR_OPEN_S)&&(!GET_TF_S(advanced_chess_shape)))
-                    {
-                        chess_shape_state[h_direction]+=THREE_OPEN_S;
-                        goto case_2_end;
-                    }
-                    
+                    chess_shape_state[h_direction]+=TWO_HALF_S;
                 }
                 
-
-                case_2_end:
+                // case_2_end:
                 chessboard[i][j]=EMPTY;
                 break;
-
+            //TODO: 
             case 1:// ^ 同理，也不可能形成一个冲四一个跳活三，那样只能是眠三（因为长连）
                 four_check_num=0;
 
-                chessboard[i][j]=player;
-
-                if (
-                    chess_state[h_direction*2][1]==1 &&
-                    chess_state[h_direction*2][2]==3 &&
-                    (!is_banned(chessboard,i+i_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),j+j_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),-1))
-                )
+                //FOUR
+                if (player==BLACK)
                 {
-                    four_check_num++;
-                }
-                if (
-                    chess_state[h_direction*2+1][1]==1 &&
-                    chess_state[h_direction*2+1][2]==3 &&
-                    (!is_banned(chessboard,i+i_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),j+j_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),-1))
-                )
-                {
-                    four_check_num++;
-                }
+                    chessboard[i][j]=player;
 
-                chessboard[i][j]=EMPTY;
+                    if (
+                        chess_state[h_direction*2][1]==1 &&
+                        chess_state[h_direction*2][2]==3 &&
+                        (!is_banned(chessboard,i+i_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),j+j_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),-1))
+                    )
+                    {
+                        four_check_num++;
+                    }
+                    if (
+                        chess_state[h_direction*2+1][1]==1 &&
+                        chess_state[h_direction*2+1][2]==3 &&
+                        (!is_banned(chessboard,i+i_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),j+j_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),-1))
+                    )
+                    {
+                        four_check_num++;
+                    }
+
+                    chessboard[i][j]=EMPTY;
+                    chess_shape_state[h_direction]+=FOUR_HALF_S*four_check_num;
+                }
+                else
+                {
+                    if (chess_state[h_direction*2][1]==1 && chess_state[h_direction*2][2]==3)
+                    {
+                        four_check_num++;
+                    }
+                    if (chess_state[h_direction*2+1][1]==1 && chess_state[h_direction*2+1][2]==3)
+                    {
+                        four_check_num++;
+                    }
+
+                    switch (four_check_num)
+                    {
+                    case 2:
+                        chess_shape_state[h_direction]+=FOUR_OPEN_S;
+                        break;
+                    case 1:
+                        chess_shape_state[h_direction]+=FOUR_HALF_S;
+                        break;
+                    default:
+                        break;
+                    }
+                    
+                }
                 
+                //TODO: 跳三判断
 
-                chess_shape_state[h_direction]+=FOUR_HALF_S*four_check_num;
-                //TODO: 跳活三判断
-
-                chessboard[i][j]=player;
-                // chess_shape_t advanced_chess_shape=0;
-
-                if (chess_state[h_direction*2][1]==1&&chess_state[h_direction*2][2]==2)
+                if (player==BLACK)
                 {
-                    advanced_chess_shape=is_banned(chessboard,i+i_direction[h_direction*2]*(1),j+j_direction[h_direction*2]*(1),h_direction);
-                    if (GET_SHAPE_S(advanced_chess_shape,FOUR_OPEN_S)&&(!GET_TF_S(advanced_chess_shape)))
+                    chessboard[i][j]=player;
+
+                    if (chess_state[h_direction*2][1]==1&&chess_state[h_direction*2][2]==2)
                     {
-                        chess_shape_state[h_direction]+=THREE_OPEN_S;
-                        goto case_1_end;
+                        advanced_chess_shape=is_banned(chessboard,i+i_direction[h_direction*2]*(1),j+j_direction[h_direction*2]*(1),h_direction);
+                        if (GET_SHAPE_S(advanced_chess_shape,FOUR_OPEN_S)&&(!GET_TF_S(advanced_chess_shape)))
+                        {
+                            chess_shape_state[h_direction]+=THREE_OPEN_S;
+                            goto case_1_end;
+                        }
+                        else if (GET_SHAPE_S(advanced_chess_shape,FOUR_HALF_S)&&(!GET_TF_S(advanced_chess_shape)))
+                        {
+                            chess_shape_state[h_direction]+=THREE_HALF_S;
+                            goto case_1_end;
+                        }
+                        
+
+                    }
+                    if (chess_state[h_direction*2+1][1]==1&&chess_state[h_direction*2+1][2]==2)
+                    {
+                        advanced_chess_shape=is_banned(chessboard,i+i_direction[h_direction*2+1]*(1),j+j_direction[h_direction*2+1]*(1),h_direction);
+                        if (GET_SHAPE_S(advanced_chess_shape,FOUR_OPEN_S)&&(!GET_TF_S(advanced_chess_shape)))
+                        {
+                            chess_shape_state[h_direction]+=THREE_OPEN_S;
+                            goto case_1_end;
+                        }
+                        else if (GET_SHAPE_S(advanced_chess_shape,FOUR_HALF_S)&&(!GET_TF_S(advanced_chess_shape)))
+                        {
+                            chess_shape_state[h_direction]+=THREE_HALF_S;
+                            goto case_1_end;
+                        }
+                    }
+                }
+                else
+                {
+                    if (chess_state[h_direction*2][1]==1&&chess_state[h_direction*2][2]==2)
+                    {
+                        if ((chess_state[h_direction*2][3]==-1&&chess_state[h_direction*2+1][1]>0)||(chess_state[h_direction*2][3]>0&&chess_state[h_direction*2+1][1]==-1))
+                        {
+                            chess_shape_state[h_direction]+=THREE_HALF_S;
+                        }
+                        else if (chess_state[h_direction*2][3]>0&&chess_state[h_direction*2+1][1]>0)
+                        {
+                            chess_shape_state[h_direction]+=THREE_OPEN_S;// ^ 这里存疑 eOOeOeOOe ，由下面修正
+                        }
+                    }
+                    else if (chess_state[h_direction*2+1][1]==1&&chess_state[h_direction*2+1][2]==2)// ^ 这个else必须加，进行 THREE_OPEN_S 的修正
+                    {
+                        if ((chess_state[h_direction*2+1][3]==-1&&chess_state[h_direction*2][1]>0)||(chess_state[h_direction*2+1][3]>0&&chess_state[h_direction*2][1]==-1))
+                        {
+                            chess_shape_state[h_direction]+=THREE_HALF_S;
+                        }
+                        else if (chess_state[h_direction*2+1][3]>0&&chess_state[h_direction*2][1]>0)
+                        {
+                            chess_shape_state[h_direction]+=THREE_OPEN_S;
+                        }
                     }
                     
                 }
-                if (chess_state[h_direction*2+1][1]==1&&chess_state[h_direction*2+1][2]==2)
-                {
-                    advanced_chess_shape=is_banned(chessboard,i+i_direction[h_direction*2+1]*(1),j+j_direction[h_direction*2+1]*(1),h_direction);
-                    if (GET_SHAPE_S(advanced_chess_shape,FOUR_OPEN_S)&&(!GET_TF_S(advanced_chess_shape)))
-                    {
-                        chess_shape_state[h_direction]+=THREE_OPEN_S;
-                        goto case_1_end;
-                    }
-                    
-                }
+                
+                //^ 跳2判断
+
+                //^ 先不给分看看
+                
 
                 case_1_end:
                 chessboard[i][j]=EMPTY;
@@ -470,14 +759,68 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
             }
             else if (chess_state[direction_unblocked][0]+1==4)
             {
-                chessboard[i][j]=player;
-                if (chess_state[direction_unblocked][1]>0||(!is_banned(chessboard,i+i_direction[direction_unblocked]*4,j+j_direction[direction_unblocked]*4,-1)))
+                if (player==BLACK)
                 {
-                    chess_shape_state[h_direction]+=FOUR_HALF_S;
+                    chessboard[i][j]=player;
+                    if (chess_state[direction_unblocked][1]>0||(!is_banned(chessboard,i+i_direction[direction_unblocked]*4,j+j_direction[direction_unblocked]*4,-1)))
+                    {
+                        chess_shape_state[h_direction]+=FOUR_HALF_S;
+                    }
+                    chessboard[i][j]=EMPTY;
                 }
-                chessboard[i][j]=EMPTY;
+                else
+                {
+                    if (chess_state[direction_unblocked][1]>0)
+                    {
+                        chess_shape_state[h_direction]+=FOUR_HALF_S;
+                    }
+                    
+                }
                 
             }
+            else if (chess_state[direction_unblocked][0]+1==3)
+            {
+                if (player==BLACK)
+                {
+                    chessboard[i][j]=player;
+                    if (chess_state[direction_unblocked][1]>0||(!is_banned(chessboard,i+i_direction[direction_unblocked]*4,j+j_direction[direction_unblocked]*4,-1)))
+                    {
+                        chess_shape_state[h_direction]+=THREE_HALF_S;
+                    }
+                    chessboard[i][j]=EMPTY;
+                }
+                else
+                {
+                    if (chess_state[direction_unblocked][1]>0)
+                    {
+                        chess_shape_state[h_direction]+=THREE_HALF_S;
+                    }
+                    
+                }
+                
+            }
+            else if (chess_state[direction_unblocked][0]+1==2)
+            {
+                if (player==BLACK)
+                {
+                    chessboard[i][j]=player;
+                    if (chess_state[direction_unblocked][1]>0||(!is_banned(chessboard,i+i_direction[direction_unblocked]*4,j+j_direction[direction_unblocked]*4,-1)))
+                    {
+                        chess_shape_state[h_direction]+=TWO_HALF_S;
+                    }
+                    chessboard[i][j]=EMPTY;
+                }
+                else
+                {
+                    if (chess_state[direction_unblocked][1]>0)
+                    {
+                        chess_shape_state[h_direction]+=TWO_HALF_S;
+                    }
+                    
+                }
+                
+            }
+            
             
         }
         
