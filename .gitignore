@@ -8,3 +8,8 @@ temp*
 commit*
 *.o
 log*
+/CMakeFiles
+build*
+.ninja*
+CMakeCache.txt
+*.cmake

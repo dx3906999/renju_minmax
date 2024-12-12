@@ -7,15 +7,26 @@
 #include <string.h>
 
 
+// enum CHESS_VALUE {
+//     forbidden = 0,
+//     five = 10000000,
+//     four_open = 900000,
+//     four_half = 100000,
+//     three_open = 70000,
+//     three_half = 10000,
+//     two_open = 1000,
+//     two_half = 100,
+// };
+
 enum CHESS_VALUE {
     forbidden = 0,
-    five = 10000000,
-    four_open = 900000,
-    four_half = 100000,
-    three_open = 70000,
-    three_half = 10000,
-    two_open = 1000,
-    two_half = 100,
+    five = 50000,
+    four_open = 4320,
+    four_half = 720,
+    three_open = 720,
+    three_half = 100,
+    two_open = 120,
+    two_half = 20,
 };
 
 value_t evaluate_chess_shape(player_t player, chess_shape_t chess_shape){
@@ -99,7 +110,7 @@ void evaluate_board(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], player_
                 }
                 
                 
-                score_board_output[i][j]=abs(evaluate_chess_shape(player,chess_shape_sum_player)-evaluate_chess_shape(OPS_PLAYER(player),chess_shape_sum_ops));
+                score_board_output[i][j]=evaluate_chess_shape(player,chess_shape_sum_player)+evaluate_chess_shape(OPS_PLAYER(player),chess_shape_sum_ops);
             }
             else
             {

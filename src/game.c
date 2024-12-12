@@ -91,7 +91,7 @@ int main(int argc, char const *argv[])
             human_vs_ai_white();
             break;
         case 4:
-            train();
+            // train();
             break;
         case 5:
             exit(0);
@@ -506,7 +506,7 @@ void human_vs_ai_white(){
             j_white_last=j_current;
             update_global_chessboard_data_one_step();
             update_chessboard_str();
-            is_winner_state=is_winner(global_chessboard_data,BLACK,i_white_last,j_white_last);
+            is_winner_state=is_winner(global_chessboard_data,WHITE,i_white_last,j_white_last);
             if (is_winner_state==2)
             {
                 printf("Black lost!\n");
