@@ -10,6 +10,7 @@
 #include "state.h"
 #include "referee.h"
 #include "evaluate.h"
+#include "minmax.h"
 
 const int i_direction[8]={1,-1,0,0,1,-1,1,-1};
 const int j_direction[8]={0,0,1,-1,1,-1,-1,1};
@@ -209,7 +210,7 @@ void human_vs_human(){
             display_board(board_state->chessboard,(board_state->history_actions_num-2>=0)?(board_state->history_actions[board_state->history_actions_num-2]):(NULL_ACTION),(board_state->history_actions_num-1>=0)?(board_state->history_actions[board_state->history_actions_num-1]):(NULL_ACTION));
             printf("Round %d:black's (%ls %ls) turn.\n",board_state->history_actions_num/2+1,BLACK_STR,BLACK_LAST_STR);
             printf("Please input the position of your chess piece, such as 'a1' or 'A1'.\n");
-            printf("value: %" PRId64 "\n",evaluate_whole_board(board_state->chessboard,board_state->current_player));
+            // printf("value: %" PRId64 "\n",evaluate_whole_board(board_state->chessboard,board_state->current_player));
             input_state=get_move_input(&i_input,&j_input);
             if (input_state)
             {
@@ -254,7 +255,7 @@ void human_vs_human(){
             display_board(board_state->chessboard,(board_state->history_actions_num-1>=0)?(board_state->history_actions[board_state->history_actions_num-1]):(NULL_ACTION),(board_state->history_actions_num-2>=0)?(board_state->history_actions[board_state->history_actions_num-2]):(NULL_ACTION));
             printf("Round %d:white's (%ls %ls) turn.\n",board_state->history_actions_num/2+1,WHITE_STR,WHITE_LAST_STR);
             printf("Please input the position of your chess piece, such as 'a1' or 'A1'.\n");
-            printf("value: %" PRId64 "\n",evaluate_whole_board(board_state->chessboard,board_state->current_player));
+            // printf("value: %" PRId64 "\n",evaluate_whole_board(board_state->chessboard,board_state->current_player));
             input_state=get_move_input(&i_input,&j_input);
             if (input_state)
             {
@@ -298,7 +299,7 @@ void human_vs_white_ai(){
     bool input_state=true;
     int i_input,j_input;
     int is_winner_state=0;
-    value_t score_board[CHESSBOARD_LEN][CHESSBOARD_LEN]={0};
+    // value_t score_board[CHESSBOARD_LEN][CHESSBOARD_LEN]={0};
 
     while(true){
         do
@@ -349,8 +350,12 @@ void human_vs_white_ai(){
         display_board(board_state->chessboard,(board_state->history_actions_num-1>=0)?(board_state->history_actions[board_state->history_actions_num-1]):(NULL_ACTION),(board_state->history_actions_num-2>=0)?(board_state->history_actions[board_state->history_actions_num-2]):(NULL_ACTION));
         printf("Round %d:white's (%ls %ls) turn.\n",board_state->history_actions_num/2+1,WHITE_STR,WHITE_LAST_STR);
 
-        evaluate_board(board_state->chessboard,WHITE,score_board);
-        choose_max_score_pos(score_board,&i_input,&j_input);
+        // evaluate_board(board_state->chessboard,WHITE,score_board);
+        // choose_max_score_pos(score_board,&i_input,&j_input);
+
+        action_t ai_action=choose_action(board_state,WHITE);
+        i_input=ai_action/CHESSBOARD_LEN;
+        j_input=ai_action%CHESSBOARD_LEN;
 
         do_action(board_state,i_input*CHESSBOARD_LEN+j_input);
         printf("AI move: %c%d\n",'A'+j_input,15-i_input);

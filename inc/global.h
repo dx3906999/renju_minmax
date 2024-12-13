@@ -21,6 +21,8 @@ extern "C" {
 #define OPS_PLAYER(player) (-(player))
 
 #define NULL_ACTION 255
+#define MAX_ACTIONS_IN_ONE_STEP 10
+#define MAX_SEARCH_DEPTH 6
 
 typedef char player_t;
 //typedef int bool;

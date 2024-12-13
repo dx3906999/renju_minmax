@@ -724,6 +724,30 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                 //^ 跳2判断
 
                 //^ 先不给分看看
+                if (chess_state[h_direction*2][1]==1&&chess_state[h_direction*2][2]==1)
+                {
+                    if ((chess_state[h_direction*2][3]<0&&chess_state[h_direction*2+1][1]>0)||(chess_state[h_direction*2][3]>0&&chess_state[h_direction*2+1][1]<0))
+                    {
+                        chess_shape_state[h_direction]+=TWO_HALF_S;
+                    }
+                    else if (chess_state[h_direction*2][3]>0&&chess_state[h_direction*2+1][1]>0)
+                    {
+                        chess_shape_state[h_direction]+=THREE_OPEN_S;
+                    }
+                    
+                }
+                else if (chess_state[h_direction*2+1][1]==1&&chess_state[h_direction*2+1][2]==1)
+                {
+                    if ((chess_state[h_direction*2+1][3]<0&&chess_state[h_direction*2][1]>0)||(chess_state[h_direction*2+1][3]>0&&chess_state[h_direction*2][1]<0))
+                    {
+                        chess_shape_state[h_direction]+=TWO_HALF_S;
+                    }
+                    else if (chess_state[h_direction*2+1][3]>0&&chess_state[h_direction*2][1]>0)
+                    {
+                        chess_shape_state[h_direction]+=THREE_OPEN_S;
+                    }
+                }
+                
                 
 
                 case_1_end:

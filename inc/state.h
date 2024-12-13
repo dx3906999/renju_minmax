@@ -20,6 +20,7 @@ struct State
 
 State* init_state();
 void do_action(State* state,action_t action);
+bool undo_action(State* state);
 
 #ifdef __cplusplus
 }
