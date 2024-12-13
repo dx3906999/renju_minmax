@@ -41,7 +41,7 @@ int main(int argc, char const *argv[])
 {
     signal(SIG_SAVE,signal_handle);
 #ifdef __linux__
-    setlocale(LC_CTYPE, "zh-CN.GBK");
+    setlocale(LC_CTYPE, "zh_CN.GBK");
 #elif defined(_WIN32)
     setlocale(LC_CTYPE, ".936");
 #endif
