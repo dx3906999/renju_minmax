@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 
 
 // enum CHESS_VALUE {
@@ -246,7 +247,7 @@ void display_score_board(value_t score_board_output[CHESSBOARD_LEN][CHESSBOARD_L
     {
         for (size_t j = 0; j < CHESSBOARD_LEN; j++)
         {
-            printf("%lld\t",score_board_output[i][j]);
+            printf("%" PRId64 "\t",score_board_output[i][j]);
         }
         printf("\n");
     }

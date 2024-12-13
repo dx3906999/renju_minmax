@@ -26,4 +26,20 @@ void do_action(State* state,action_t action){
     state->current_player=OPS_PLAYER(state->current_player);
 }
 
+bool undo_action(State* state){
+    action_t last_action=(state->history_actions_num>0)?state->history_actions[state->history_actions_num-1]:NULL_ACTION;
+    if (last_action!=NULL_ACTION)
+    {
+        state->chessboard[last_action/CHESSBOARD_LEN][last_action%CHESSBOARD_LEN]=EMPTY;
+        state->history_actions_num--;
+        state->current_player=OPS_PLAYER(state->current_player);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+    
+}
+
 

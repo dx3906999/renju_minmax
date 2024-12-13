@@ -14,20 +14,20 @@
 const int i_direction[8]={1,-1,0,0,1,-1,1,-1};
 const int j_direction[8]={0,0,1,-1,1,-1,-1,1};
 
-const wchar_t TAB_LU=L'©°';
-const wchar_t TAB_RU=L'©´';
-const wchar_t TAB_LD=L'©¸';
-const wchar_t TAB_RD=L'©¼';
-const wchar_t TAB_U=L'©Ð';
-const wchar_t TAB_D=L'©Ø';
-const wchar_t TAB_L=L'©À';
-const wchar_t TAB_R=L'©È';
-const wchar_t TAB_M=L'©à';
-const wchar_t TAB_H=L'©¤';
-const wchar_t BLACK_STR=L'¡ð';
-const wchar_t WHITE_STR=L'¡ñ';
-const wchar_t BLACK_LAST_STR=L'¡÷';
-const wchar_t WHITE_LAST_STR=L'¡ø';
+const wchar_t TAB_LU[]=L"©°";
+const wchar_t TAB_RU[]=L"©´";
+const wchar_t TAB_LD[]=L"©¸";
+const wchar_t TAB_RD[]=L"©¼";
+const wchar_t TAB_U[]=L"©Ð";
+const wchar_t TAB_D[]=L"©Ø";
+const wchar_t TAB_L[]=L"©À";
+const wchar_t TAB_R[]=L"©È";
+const wchar_t TAB_M[]=L"©à";
+const wchar_t TAB_H[]=L"©¤";
+const wchar_t BLACK_STR[]=L"¡ð";
+const wchar_t WHITE_STR[]=L"¡ñ";
+const wchar_t BLACK_LAST_STR[]=L"¡÷";
+const wchar_t WHITE_LAST_STR[]=L"¡ø";
 
 const char RENJU_BANNER[]=
 "\x1b[1;33m"
@@ -95,20 +95,20 @@ void display_board(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], action_t
         {
             if (chessboard[i][j]==BLACK)
             {
-                printf("%lc",(i==black_last_action/CHESSBOARD_LEN&&j==black_last_action%CHESSBOARD_LEN)?(BLACK_LAST_STR):(BLACK_STR));
+                printf("%ls",(i==black_last_action/CHESSBOARD_LEN&&j==black_last_action%CHESSBOARD_LEN)?(BLACK_LAST_STR):(BLACK_STR));
             }
             else if (chessboard[i][j]==WHITE)
             {
-                printf("%lc",(i==white_last_action/CHESSBOARD_LEN&&j==white_last_action%CHESSBOARD_LEN)?(WHITE_LAST_STR):(WHITE_STR));
+                printf("%ls",(i==white_last_action/CHESSBOARD_LEN&&j==white_last_action%CHESSBOARD_LEN)?(WHITE_LAST_STR):(WHITE_STR));
             }
             else
             {
-                printf("%lc",(i==0&&j==0)?(TAB_LU):(i==0&&j==CHESSBOARD_LEN-1)?(TAB_RU):(i==CHESSBOARD_LEN-1&&j==0)?(TAB_LD):(i==CHESSBOARD_LEN-1&&j==CHESSBOARD_LEN-1)?(TAB_RD):(i==0)?(TAB_U):(i==CHESSBOARD_LEN-1)?(TAB_D):(j==0)?(TAB_L):(j==CHESSBOARD_LEN-1)?(TAB_R):(TAB_M));
+                printf("%ls",(i==0&&j==0)?(TAB_LU):(i==0&&j==CHESSBOARD_LEN-1)?(TAB_RU):(i==CHESSBOARD_LEN-1&&j==0)?(TAB_LD):(i==CHESSBOARD_LEN-1&&j==CHESSBOARD_LEN-1)?(TAB_RD):(i==0)?(TAB_U):(i==CHESSBOARD_LEN-1)?(TAB_D):(j==0)?(TAB_L):(j==CHESSBOARD_LEN-1)?(TAB_R):(TAB_M));
             }
             
             if (j!=CHESSBOARD_LEN-1)
             {
-                printf("%lc",TAB_H);
+                printf("%ls",TAB_H);
             }
             
         }
@@ -197,7 +197,7 @@ void signal_handle(int signum){
 
 void human_vs_human(){
     printf("\x1b[0m\x1b[1;32mHuman vs Human mode.\n\x1b[0m");
-    printf("%lc is black and %lc is white.\n",BLACK_STR,WHITE_STR);
+    printf("%ls is black and %ls is white.\n",BLACK_STR,WHITE_STR);
     State* board_state=init_state();
     bool input_state=true;
     int i_input,j_input;
@@ -207,9 +207,9 @@ void human_vs_human(){
         do
         {
             display_board(board_state->chessboard,(board_state->history_actions_num-2>=0)?(board_state->history_actions[board_state->history_actions_num-2]):(NULL_ACTION),(board_state->history_actions_num-1>=0)?(board_state->history_actions[board_state->history_actions_num-1]):(NULL_ACTION));
-            printf("Round %d:black's (%lc %lc) turn.\n",board_state->history_actions_num/2+1,BLACK_STR,BLACK_LAST_STR);
+            printf("Round %d:black's (%ls %ls) turn.\n",board_state->history_actions_num/2+1,BLACK_STR,BLACK_LAST_STR);
             printf("Please input the position of your chess piece, such as 'a1' or 'A1'.\n");
-            printf("value: %lld\n",evaluate_whole_board(board_state->chessboard,board_state->current_player));
+            printf("value: %" PRId64 "\n",evaluate_whole_board(board_state->chessboard,board_state->current_player));
             input_state=get_move_input(&i_input,&j_input);
             if (input_state)
             {
@@ -252,9 +252,9 @@ void human_vs_human(){
         do
         {
             display_board(board_state->chessboard,(board_state->history_actions_num-1>=0)?(board_state->history_actions[board_state->history_actions_num-1]):(NULL_ACTION),(board_state->history_actions_num-2>=0)?(board_state->history_actions[board_state->history_actions_num-2]):(NULL_ACTION));
-            printf("Round %d:white's (%lc %lc) turn.\n",board_state->history_actions_num/2+1,WHITE_STR,WHITE_LAST_STR);
+            printf("Round %d:white's (%ls %ls) turn.\n",board_state->history_actions_num/2+1,WHITE_STR,WHITE_LAST_STR);
             printf("Please input the position of your chess piece, such as 'a1' or 'A1'.\n");
-            printf("value: %lld\n",evaluate_whole_board(board_state->chessboard,board_state->current_player));
+            printf("value: %" PRId64 "\n",evaluate_whole_board(board_state->chessboard,board_state->current_player));
             input_state=get_move_input(&i_input,&j_input);
             if (input_state)
             {
@@ -293,7 +293,7 @@ void human_vs_human(){
 
 void human_vs_white_ai(){
     printf("\x1b[0m\x1b[1;32mHuman vs AI (white) mode.\n\x1b[0m");
-    printf("%lc is black and %lc is white.\n",BLACK_STR,WHITE_STR);
+    printf("%ls is black and %ls is white.\n",BLACK_STR,WHITE_STR);
     State* board_state=init_state();
     bool input_state=true;
     int i_input,j_input;
@@ -304,7 +304,7 @@ void human_vs_white_ai(){
         do
         {
             display_board(board_state->chessboard,(board_state->history_actions_num-2>=0)?(board_state->history_actions[board_state->history_actions_num-2]):(NULL_ACTION),(board_state->history_actions_num-1>=0)?(board_state->history_actions[board_state->history_actions_num-1]):(NULL_ACTION));
-            printf("Round %d:black's (%lc %lc) turn.\n",board_state->history_actions_num/2+1,BLACK_STR,BLACK_LAST_STR);
+            printf("Round %d:black's (%ls %ls) turn.\n",board_state->history_actions_num/2+1,BLACK_STR,BLACK_LAST_STR);
             printf("Please input the position of your chess piece, such as 'a1' or 'A1'.\n");
             input_state=get_move_input(&i_input,&j_input);
             if (input_state)
@@ -347,7 +347,7 @@ void human_vs_white_ai(){
 
         // WHITE AI TURN
         display_board(board_state->chessboard,(board_state->history_actions_num-1>=0)?(board_state->history_actions[board_state->history_actions_num-1]):(NULL_ACTION),(board_state->history_actions_num-2>=0)?(board_state->history_actions[board_state->history_actions_num-2]):(NULL_ACTION));
-        printf("Round %d:white's (%lc %lc) turn.\n",board_state->history_actions_num/2+1,WHITE_STR,WHITE_LAST_STR);
+        printf("Round %d:white's (%ls %ls) turn.\n",board_state->history_actions_num/2+1,WHITE_STR,WHITE_LAST_STR);
 
         evaluate_board(board_state->chessboard,WHITE,score_board);
         choose_max_score_pos(score_board,&i_input,&j_input);

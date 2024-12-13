@@ -7,6 +7,7 @@ extern "C" {
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <inttypes.h>
 #define BLACK 1
 #define WHITE -1
 #define EMPTY 0
