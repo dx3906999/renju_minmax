@@ -193,7 +193,7 @@ value_t evaluate_whole_board(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN]
                 }
                 
                 
-                score+=evaluate_chess_shape_for_all(player,chess_shape_sum_player)+score_pos_distribution_single(CHESSBOARD_LEN/2+1,CHESSBOARD_LEN/2+1,20,1);
+                score+=evaluate_chess_shape_for_all(player,chess_shape_sum_player);
             }
             else if (chessboard[i][j]==OPS_PLAYER(player))
             {
@@ -208,7 +208,7 @@ value_t evaluate_whole_board(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN]
                     chess_shape_sum_ops=(GET_SHAPE_S(chess_shape_sum_ops,OVERLINE_S)||(GET_SHAPE_S(chess_shape_sum_ops,FOUR_HALF_S)+GET_SHAPE_S(chess_shape_sum_ops,FOUR_HALF_S)>=2)||GET_SHAPE_S(chess_shape_sum_ops,THREE_OPEN_S)>=2)?(chess_shape_sum_ops&TRUE_S):(chess_shape_sum_ops);
                 }
 
-                score-=evaluate_chess_shape_for_all(OPS_PLAYER(player),chess_shape_sum_ops)+score_pos_distribution_single(CHESSBOARD_LEN/2+1,CHESSBOARD_LEN/2+1,20,1);
+                score-=evaluate_chess_shape_for_all(OPS_PLAYER(player),chess_shape_sum_ops);
             }
             
             
