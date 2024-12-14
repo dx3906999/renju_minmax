@@ -19,16 +19,6 @@
 //     two_half = 100,
 // };
 
-enum CHESS_VALUE {
-    forbidden = 0,
-    five = 50000,
-    four_open = 4320,
-    four_half = 720,
-    three_open = 720,
-    three_half = 100,
-    two_open = 120,
-    two_half = 20,
-};
 
 value_t evaluate_chess_shape(player_t player, chess_shape_t chess_shape){
     value_t score = 0;
@@ -67,6 +57,13 @@ value_t evaluate_chess_shape(player_t player, chess_shape_t chess_shape){
         // score+=one_half*GET_SHAPE_S(chess_shape,ONE_HALF_S);
         
     }
+
+    if (GET_SHAPE_S(chess_shape,four_half)+GET_SHAPE_S(chess_shape,three_open)+GET_SHAPE_S(chess_shape,four_open)>=2)
+    {
+        score+=four_open;
+    }
+    
+
     
     return score;
     
@@ -269,3 +266,7 @@ void choose_max_score_pos(value_t score_board_output[CHESSBOARD_LEN][CHESSBOARD_
         }
     }
 }
+
+
+//TODO: À„…±
+

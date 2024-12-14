@@ -43,5 +43,7 @@ void insert_heap(HeapNode heap[], int *size, value_t value, action_t index, int 
 
 }
 
-
+int compare_heap_node(const void *a, const void *b){
+    return ((HeapNode*)b)->value - ((HeapNode*)a)->value;
+}
 

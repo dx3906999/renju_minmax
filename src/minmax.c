@@ -11,7 +11,7 @@ void get_prob_actions(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], actio
     value_t score_board[CHESSBOARD_LEN][CHESSBOARD_LEN]={0};
     evaluate_board(chessboard,player,score_board);
     int heap_size=0;
-    size_t temp_index=0;
+    // size_t temp_index=0;
     
     for (size_t i = 0; i < CHESSBOARD_LEN; i++)
     {
@@ -21,25 +21,23 @@ void get_prob_actions(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], actio
         }
         
     }
+
+    qsort(heap,heap_size,sizeof(HeapNode),compare_heap_node);
     
     for (size_t i = 0; i < MAX_ACTIONS_IN_ONE_STEP; i++)
     {
-        if (i<heap_size)
+        if (heap[i].value>0)
         {
-            if (heap[i].value!=0)
-            {
-                prob_actions_output[temp_index]=heap[i].index;
-                temp_index++;
-            }
-            
+            prob_actions_output[i]=heap[i].index;
         }
+        else
+        {
+            prob_actions_output[i]=NULL_ACTION;
+        }
+        
         
     }
     
-    for (size_t i = temp_index; i < MAX_ACTIONS_IN_ONE_STEP; i++)
-    {
-        prob_actions_output[i]=NULL_ACTION;
-    }
     
 }
 
@@ -119,5 +117,36 @@ action_t choose_action(State* state, player_t player){
     }
 
     return best_action;
+    
+}
+
+action_t choose_action_with_iterative_deepening(State* state, player_t player){
+    value_t best_score=INT64_MIN;
+    action_t best_action=NULL_ACTION;
+    action_t prob_actions[MAX_ACTIONS_IN_ONE_STEP]={0};
+    get_prob_actions(state->chessboard,prob_actions,player);
+
+    for (size_t depth = 2; depth <= MAX_SEARCH_DEPTH; depth+=2)
+    {
+        for (size_t i = 0; i < MAX_ACTIONS_IN_ONE_STEP; i++)
+        {
+            do_action(state,prob_actions[i]);
+            value_t temp_score=alpha_beta_search(depth-1,state,INT64_MIN,INT64_MAX,false,player);
+            undo_action(state);
+
+            if (temp_score>=five)
+            {
+                return prob_actions[i];
+            }
+            
+
+            if (depth==MAX_SEARCH_DEPTH && temp_score>best_score)
+            {
+                best_score=temp_score;
+                best_action=prob_actions[i];
+            }
+
+        }
+    }
     
 }

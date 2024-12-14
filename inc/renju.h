@@ -11,6 +11,7 @@ bool get_move_input(int* i, int* j);
 bool check_move_input_is_valid(player_t chessboard_data[15][15],int i,int j);
 void signal_handle(int signum);
 void human_vs_human();
+void human_vs_black_ai();
 void human_vs_white_ai();
 
 #endif

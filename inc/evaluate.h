@@ -5,6 +5,17 @@
 
 typedef int64_t value_t;
 
+enum CHESS_VALUE {
+    forbidden = 0,
+    five = 50000,
+    four_open = 4320,
+    four_half = 720,
+    three_open = 720,
+    three_half = 100,
+    two_open = 120,
+    two_half = 20,
+};
+
 value_t evaluate_chess_shape(player_t player, chess_shape_t chess_shape);
 value_t evaluate_chess_shape_for_all(player_t player, chess_shape_t chess_shape);
 void evaluate_board(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], player_t player, value_t score_board_output[CHESSBOARD_LEN][CHESSBOARD_LEN]);

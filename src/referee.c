@@ -732,7 +732,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                     }
                     else if (chess_state[h_direction*2][3]>0&&chess_state[h_direction*2+1][1]>0)
                     {
-                        chess_shape_state[h_direction]+=THREE_OPEN_S;
+                        chess_shape_state[h_direction]+=TWO_OPEN_S;
                     }
                     
                 }
@@ -744,7 +744,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                     }
                     else if (chess_state[h_direction*2+1][3]>0&&chess_state[h_direction*2][1]>0)
                     {
-                        chess_shape_state[h_direction]+=THREE_OPEN_S;
+                        chess_shape_state[h_direction]+=TWO_OPEN_S;
                     }
                 }
                 
@@ -829,7 +829,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                 if (player==BLACK)
                 {
                     chessboard[i][j]=player;
-                    if (chess_state[direction_unblocked][1]>0||(!is_banned(chessboard,i+i_direction[direction_unblocked]*4,j+j_direction[direction_unblocked]*4,-1)))
+                    if (chess_state[direction_unblocked][1]>0)
                     {
                         chess_shape_state[h_direction]+=TWO_HALF_S;
                     }
