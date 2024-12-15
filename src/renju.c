@@ -312,7 +312,8 @@ void human_vs_black_ai(){
         }
         else
         {
-            action_t ai_action=choose_action(board_state,BLACK);
+            // action_t ai_action=choose_action(board_state,BLACK);
+            action_t ai_action=choose_action_with_iterative_deepening(board_state,BLACK);
             i_input=ai_action/CHESSBOARD_LEN;
             j_input=ai_action%CHESSBOARD_LEN;
         }
@@ -443,7 +444,8 @@ void human_vs_white_ai(){
         // evaluate_board(board_state->chessboard,WHITE,score_board);
         // choose_max_score_pos(score_board,&i_input,&j_input);
 
-        action_t ai_action=choose_action(board_state,WHITE);
+        // action_t ai_action=choose_action(board_state,WHITE);
+        action_t ai_action=choose_action_with_iterative_deepening(board_state,WHITE);
         i_input=ai_action/CHESSBOARD_LEN;
         j_input=ai_action%CHESSBOARD_LEN;
 

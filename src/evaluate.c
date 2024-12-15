@@ -69,7 +69,7 @@ value_t evaluate_chess_shape(player_t player, chess_shape_t chess_shape){
     
 }
 
-value_t evaluate_chess_shape_for_all(player_t player, chess_shape_t chess_shape){
+value_t evaluate_chess_shape_for_all(player_t player, chess_shape_t chess_shape, bool is_self){
     value_t score = 0;
     if (player==BLACK)
     {
@@ -79,31 +79,58 @@ value_t evaluate_chess_shape_for_all(player_t player, chess_shape_t chess_shape)
         }
         else
         {
-            score+=five*GET_SHAPE_S(chess_shape,FIVE_S)/5;
-            score+=four_open*GET_SHAPE_S(chess_shape,FOUR_OPEN_S)/4;
-            score+=four_half*GET_SHAPE_S(chess_shape,FOUR_HALF_S)/4;
-            score+=three_open*GET_SHAPE_S(chess_shape,THREE_OPEN_S)/3;
-            score+=three_half*GET_SHAPE_S(chess_shape,THREE_HALF_S)/3;
-            score+=two_open*GET_SHAPE_S(chess_shape,TWO_OPEN_S)/2;
-            score+=two_half*GET_SHAPE_S(chess_shape,TWO_HALF_S)/2;
-            // score+=one_open*GET_SHAPE_S(chess_shape,ONE_OPEN_S);
-            // score+=one_half*GET_SHAPE_S(chess_shape,ONE_HALF_S);
+            if (is_self)
+            {
+                score+=five*GET_SHAPE_S(chess_shape,FIVE_S)/5;
+                score+=four_open*GET_SHAPE_S(chess_shape,FOUR_OPEN_S)/4;
+                score+=four_half*GET_SHAPE_S(chess_shape,FOUR_HALF_S)/4;
+                score+=three_open*GET_SHAPE_S(chess_shape,THREE_OPEN_S)/3;
+                score+=three_half*GET_SHAPE_S(chess_shape,THREE_HALF_S)/3;
+                score+=two_open*GET_SHAPE_S(chess_shape,TWO_OPEN_S)/2;
+                score+=two_half*GET_SHAPE_S(chess_shape,TWO_HALF_S)/2;
+            }
+            else
+            {
+                score+=ops_five*GET_SHAPE_S(chess_shape,FIVE_S)/5;
+                score+=ops_four_open*GET_SHAPE_S(chess_shape,FOUR_OPEN_S)/4;
+                score+=ops_four_half*GET_SHAPE_S(chess_shape,FOUR_HALF_S)/4;
+                score+=ops_three_open*GET_SHAPE_S(chess_shape,THREE_OPEN_S)/3;
+                score+=ops_three_half*GET_SHAPE_S(chess_shape,THREE_HALF_S)/3;
+                score+=ops_two_open*GET_SHAPE_S(chess_shape,TWO_OPEN_S)/2;
+                score+=ops_two_half*GET_SHAPE_S(chess_shape,TWO_HALF_S)/2;
+            }
+            
+            
         }
         
         
     }
     else
     {
-        score+=five*GET_SHAPE_S(chess_shape,FIVE_S)/5;
-        score+=five*GET_SHAPE_S(chess_shape,OVERLINE_S)/5;
-        score+=four_open*GET_SHAPE_S(chess_shape,FOUR_OPEN_S)/4;
-        score+=four_half*GET_SHAPE_S(chess_shape,FOUR_HALF_S)/4;
-        score+=three_open*GET_SHAPE_S(chess_shape,THREE_OPEN_S)/3;
-        score+=three_half*GET_SHAPE_S(chess_shape,THREE_HALF_S)/3;
-        score+=two_open*GET_SHAPE_S(chess_shape,TWO_OPEN_S)/2;
-        score+=two_half*GET_SHAPE_S(chess_shape,TWO_HALF_S)/2;
-        // score+=one_open*GET_SHAPE_S(chess_shape,ONE_OPEN_S);
-        // score+=one_half*GET_SHAPE_S(chess_shape,ONE_HALF_S);
+        if (is_self)
+        {
+            score+=five*GET_SHAPE_S(chess_shape,FIVE_S)/5;
+            score+=five*GET_SHAPE_S(chess_shape,OVERLINE_S)/5;
+            score+=four_open*GET_SHAPE_S(chess_shape,FOUR_OPEN_S)/4;
+            score+=four_half*GET_SHAPE_S(chess_shape,FOUR_HALF_S)/4;
+            score+=three_open*GET_SHAPE_S(chess_shape,THREE_OPEN_S)/3;
+            score+=three_half*GET_SHAPE_S(chess_shape,THREE_HALF_S)/3;
+            score+=two_open*GET_SHAPE_S(chess_shape,TWO_OPEN_S)/2;
+            score+=two_half*GET_SHAPE_S(chess_shape,TWO_HALF_S)/2;
+        }
+        else
+        {
+            score+=ops_five*GET_SHAPE_S(chess_shape,FIVE_S)/5;
+            score+=ops_five*GET_SHAPE_S(chess_shape,OVERLINE_S)/5;
+            score+=ops_four_open*GET_SHAPE_S(chess_shape,FOUR_OPEN_S)/4;
+            score+=ops_four_half*GET_SHAPE_S(chess_shape,FOUR_HALF_S)/4;
+            score+=ops_three_open*GET_SHAPE_S(chess_shape,THREE_OPEN_S)/3;
+            score+=ops_three_half*GET_SHAPE_S(chess_shape,THREE_HALF_S)/3;
+            score+=ops_two_open*GET_SHAPE_S(chess_shape,TWO_OPEN_S)/2;
+            score+=ops_two_half*GET_SHAPE_S(chess_shape,TWO_HALF_S)/2;
+        }
+        
+        
         
     }
     
@@ -191,7 +218,7 @@ value_t evaluate_whole_board(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN]
                 }
                 
                 
-                score+=evaluate_chess_shape_for_all(player,chess_shape_sum_player);
+                score+=evaluate_chess_shape_for_all(player,chess_shape_sum_player,true);
             }
             else if (chessboard[i][j]==OPS_PLAYER(player))
             {
@@ -206,7 +233,7 @@ value_t evaluate_whole_board(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN]
                     chess_shape_sum_ops=(GET_SHAPE_S(chess_shape_sum_ops,OVERLINE_S)||(GET_SHAPE_S(chess_shape_sum_ops,FOUR_HALF_S)+GET_SHAPE_S(chess_shape_sum_ops,FOUR_HALF_S)>=2)||GET_SHAPE_S(chess_shape_sum_ops,THREE_OPEN_S)>=2)?(chess_shape_sum_ops&TRUE_S):(chess_shape_sum_ops);
                 }
 
-                score-=evaluate_chess_shape_for_all(OPS_PLAYER(player),chess_shape_sum_ops);
+                score-=evaluate_chess_shape_for_all(OPS_PLAYER(player),chess_shape_sum_ops,false);
             }
             
             
@@ -266,6 +293,11 @@ void choose_max_score_pos(value_t score_board_output[CHESSBOARD_LEN][CHESSBOARD_
         }
     }
 }
+
+
+
+
+
 
 
 //TODO: À„…±

@@ -148,5 +148,7 @@ action_t choose_action_with_iterative_deepening(State* state, player_t player){
 
         }
     }
+
+    return best_action;
     
 }
