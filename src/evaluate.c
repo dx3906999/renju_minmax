@@ -1,6 +1,7 @@
 #include "evaluate.h"
 #include "global.h"
 #include "referee.h"
+#include "state.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -168,7 +169,7 @@ void evaluate_board(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], player_
                 chess_shape_sum_ops=chess_shape_ops[0]+chess_shape_ops[1]+chess_shape_ops[2]+chess_shape_ops[3];
                 if (player==BLACK)
                 {
-                    chess_shape_sum_player=(GET_SHAPE_S(chess_shape_sum_player,OVERLINE_S)||(GET_SHAPE_S(chess_shape_sum_player,FOUR_HALF_S)+GET_SHAPE_S(chess_shape_sum_player,FOUR_HALF_S)>=2)||GET_SHAPE_S(chess_shape_sum_player,THREE_OPEN_S)>=2)?(chess_shape_sum_player&TRUE_S):(chess_shape_sum_player);
+                    chess_shape_sum_player=(GET_SHAPE_S(chess_shape_sum_player,OVERLINE_S)||(GET_SHAPE_S(chess_shape_sum_player,FOUR_HALF_S)+GET_SHAPE_S(chess_shape_sum_player,FOUR_HALF_S)>=2)||GET_SHAPE_S(chess_shape_sum_player,THREE_OPEN_S)>=2)?(chess_shape_sum_player|TRUE_S):(chess_shape_sum_player);
                 }
                 else
                 {
@@ -214,7 +215,7 @@ value_t evaluate_whole_board(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN]
                 chess_shape_sum_player=chess_shape_player[0]+chess_shape_player[1]+chess_shape_player[2]+chess_shape_player[3];
                 if (player==BLACK)
                 {
-                    chess_shape_sum_player=(GET_SHAPE_S(chess_shape_sum_player,OVERLINE_S)||(GET_SHAPE_S(chess_shape_sum_player,FOUR_HALF_S)+GET_SHAPE_S(chess_shape_sum_player,FOUR_HALF_S)>=2)||GET_SHAPE_S(chess_shape_sum_player,THREE_OPEN_S)>=2)?(chess_shape_sum_player&TRUE_S):(chess_shape_sum_player);
+                    chess_shape_sum_player=(GET_SHAPE_S(chess_shape_sum_player,OVERLINE_S)||(GET_SHAPE_S(chess_shape_sum_player,FOUR_HALF_S)+GET_SHAPE_S(chess_shape_sum_player,FOUR_HALF_S)>=2)||GET_SHAPE_S(chess_shape_sum_player,THREE_OPEN_S)>=2)?(chess_shape_sum_player|TRUE_S):(chess_shape_sum_player);
                 }
                 
                 
@@ -245,6 +246,8 @@ value_t evaluate_whole_board(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN]
     return score;
 
 }
+
+
 
 void score_pos_distribution(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN],value_t score_board_output[CHESSBOARD_LEN][CHESSBOARD_LEN], int i_center, int j_center, value_t center_value, value_t damping){
     for (size_t i = 0; i < CHESSBOARD_LEN; i++)
@@ -295,9 +298,157 @@ void choose_max_score_pos(value_t score_board_output[CHESSBOARD_LEN][CHESSBOARD_
 }
 
 
+void update_score_shape_board(ScoreShapeBoard* score_shape_board, player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], action_t action){
+    int i_action=action/CHESSBOARD_LEN;
+    int j_action=action%CHESSBOARD_LEN;
+    int i_temp=0;
+    int j_temp=0;
+    int chess_state[8][15]={0};
+    chess_shape_t chess_shape_sum_temp=0;
+    chess_shape_t chess_shape_temp[4]={0};
+
+    // init if necessary
+    for (size_t i = 0; i < CHESSBOARD_SIZE; i++)
+    {
+        if (score_shape_board->score_board_predicted[i/CHESSBOARD_LEN][i%CHESSBOARD_LEN]!=0)
+        {
+            break;
+        }
+
+        if (i==CHESSBOARD_SIZE-1)
+        {
+            score_pos_distribution(chessboard,score_shape_board->score_board_predicted,CHESSBOARD_LEN/2,CHESSBOARD_LEN/2,20,1);
+        }
+    }
+    
+    // update self
+
+    if (chessboard[i_action][j_action]!=EMPTY)
+    {
+        // memset(chess_shape_temp,0,sizeof(chess_shape_temp));
+        // memset(chess_state,0,sizeof(chess_state));
+        scan_chess_state(chessboard,i_action,j_action,chess_state,chessboard[i_action][j_action]);
+        analyze_chess_state(chess_state,chess_shape_temp,chessboard,i_action,j_action,chessboard[i_action][j_action]);
+        chess_shape_sum_temp=chess_shape_temp[0]+chess_shape_temp[1]+chess_shape_temp[2]+chess_shape_temp[3];
+        if (chessboard[i_action][j_action]==BLACK)
+        {
+            chess_shape_sum_temp=(GET_SHAPE_S(chess_shape_sum_temp,OVERLINE_S)||(GET_SHAPE_S(chess_shape_sum_temp,FOUR_HALF_S)+GET_SHAPE_S(chess_shape_sum_temp,FOUR_HALF_S)>=2)||GET_SHAPE_S(chess_shape_sum_temp,THREE_OPEN_S)>=2)?(chess_shape_sum_temp|TRUE_S):(chess_shape_sum_temp);
+        }
+        score_shape_board->shape_board[i_action][j_action][chessboard[i_action][j_action]==BLACK?0:1]=chess_shape_sum_temp;
+        // ^ 根据不同的player更新分数
+        score_shape_board->score_board_for_self[i_action][j_action][chessboard[i_action][j_action]==BLACK?0:1]=evaluate_chess_shape_for_all(chessboard[i_action][j_action],chess_shape_sum_temp,true);
+        score_shape_board->score_board_for_ops[i_action][j_action][chessboard[i_action][j_action]==BLACK?0:1]=evaluate_chess_shape_for_all(chessboard[i_action][j_action],chess_shape_sum_temp,false);
+    }
+    else
+    {
+        // black
+        // memset(chess_shape_temp,0,sizeof(chess_shape_temp));
+        // memset(chess_state,0,sizeof(chess_state));
+        scan_chess_state(chessboard,i_action,j_action,chess_state,BLACK);
+        analyze_chess_state(chess_state,chess_shape_temp,chessboard,i_action,j_action,BLACK);
+        chess_shape_sum_temp=chess_shape_temp[0]+chess_shape_temp[1]+chess_shape_temp[2]+chess_shape_temp[3];
+        chess_shape_sum_temp=(GET_SHAPE_S(chess_shape_sum_temp,OVERLINE_S)||(GET_SHAPE_S(chess_shape_sum_temp,FOUR_HALF_S)+GET_SHAPE_S(chess_shape_sum_temp,FOUR_HALF_S)>=2)||GET_SHAPE_S(chess_shape_sum_temp,THREE_OPEN_S)>=2)?(chess_shape_sum_temp|TRUE_S):(chess_shape_sum_temp);
+        score_shape_board->shape_board_predicted[i_action][j_action][0]=chess_shape_sum_temp;
+        score_shape_board->score_board_predicted[i_action][j_action]=evaluate_chess_shape(BLACK,chess_shape_sum_temp);
+        // white
+        memset(chess_shape_temp,0,sizeof(chess_shape_temp));
+        memset(chess_state,0,sizeof(chess_state));
+        scan_chess_state(chessboard,i_action,j_action,chess_state,WHITE);
+        analyze_chess_state(chess_state,chess_shape_temp,chessboard,i_action,j_action,WHITE);
+        chess_shape_sum_temp=chess_shape_temp[0]+chess_shape_temp[1]+chess_shape_temp[2]+chess_shape_temp[3];
+        score_shape_board->shape_board_predicted[i_action][j_action][1]=chess_shape_sum_temp;
+
+        score_shape_board->score_board_predicted[i_action][j_action]+=evaluate_chess_shape(WHITE,chess_shape_sum_temp);
+    }
+
+    // update score
+    for (size_t direction = 0; direction < 8; direction++)
+    {
+        for (size_t k = 1; k<15 && IS_IN_CHESSBOARD(i_action,j_action,k,direction); k++)
+        {
+            i_temp=i_action+i_direction[direction]*k;
+            j_temp=j_action+j_direction[direction]*k;
+
+            // 
+            if (chessboard[i_temp][j_temp]!=EMPTY)
+            {
+                memset(chess_shape_temp,0,sizeof(chess_shape_temp));
+                memset(chess_state,0,sizeof(chess_state));
+                scan_chess_state(chessboard,i_temp,j_temp,chess_state,chessboard[i_temp][j_temp]);
+                analyze_chess_state(chess_state,chess_shape_temp,chessboard,i_temp,j_temp,chessboard[i_temp][j_temp]);
+                chess_shape_sum_temp=chess_shape_temp[0]+chess_shape_temp[1]+chess_shape_temp[2]+chess_shape_temp[3];
+                if (chessboard[i_temp][j_temp]==BLACK)
+                {
+                    chess_shape_sum_temp=(GET_SHAPE_S(chess_shape_sum_temp,OVERLINE_S)||(GET_SHAPE_S(chess_shape_sum_temp,FOUR_HALF_S)+GET_SHAPE_S(chess_shape_sum_temp,FOUR_HALF_S)>=2)||GET_SHAPE_S(chess_shape_sum_temp,THREE_OPEN_S)>=2)?(chess_shape_sum_temp|TRUE_S):(chess_shape_sum_temp);
+                }
+
+                score_shape_board->shape_board[i_temp][j_temp][chessboard[i_temp][j_temp]==BLACK?0:1]=chess_shape_sum_temp;
+                // ^ 根据不同的player更新分数
+                score_shape_board->score_board_for_self[i_temp][j_temp][chessboard[i_temp][j_temp]==BLACK?0:1]=evaluate_chess_shape_for_all(chessboard[i_temp][j_temp],chess_shape_sum_temp,true);
+                score_shape_board->score_board_for_ops[i_temp][j_temp][chessboard[i_temp][j_temp]==BLACK?0:1]=evaluate_chess_shape_for_all(chessboard[i_temp][j_temp],chess_shape_sum_temp,false);
+
+                
+            }
+            else
+            {
+                // black
+                memset(chess_shape_temp,0,sizeof(chess_shape_temp));
+                memset(chess_state,0,sizeof(chess_state));
+                scan_chess_state(chessboard,i_temp,j_temp,chess_state,BLACK);
+                analyze_chess_state(chess_state,chess_shape_temp,chessboard,i_temp,j_temp,BLACK);
+                chess_shape_sum_temp=chess_shape_temp[0]+chess_shape_temp[1]+chess_shape_temp[2]+chess_shape_temp[3];
+                chess_shape_sum_temp=(GET_SHAPE_S(chess_shape_sum_temp,OVERLINE_S)||(GET_SHAPE_S(chess_shape_sum_temp,FOUR_HALF_S)+GET_SHAPE_S(chess_shape_sum_temp,FOUR_HALF_S)>=2)||GET_SHAPE_S(chess_shape_sum_temp,THREE_OPEN_S)>=2)?(chess_shape_sum_temp|TRUE_S):(chess_shape_sum_temp);
+
+                if (GET_TF_S(chess_shape_sum_temp)!=GET_TF_S(score_shape_board->shape_board_predicted[i_temp][j_temp][0]))
+                {
+                    // update that position
+                    score_shape_board->shape_board_predicted[i_temp][j_temp][0]=chess_shape_sum_temp;
+                    update_score_shape_board(score_shape_board,chessboard,i_temp*CHESSBOARD_LEN+j_temp);
+                }
+                
+                score_shape_board->shape_board_predicted[i_temp][j_temp][0]=chess_shape_sum_temp;
+
+                score_shape_board->score_board_predicted[i_temp][j_temp]=evaluate_chess_shape(BLACK,chess_shape_sum_temp);
+                // white
+                memset(chess_shape_temp,0,sizeof(chess_shape_temp));
+                memset(chess_state,0,sizeof(chess_state));
+                scan_chess_state(chessboard,i_temp,j_temp,chess_state,WHITE);
+                analyze_chess_state(chess_state,chess_shape_temp,chessboard,i_temp,j_temp,WHITE);
+                chess_shape_sum_temp=chess_shape_temp[0]+chess_shape_temp[1]+chess_shape_temp[2]+chess_shape_temp[3];
+
+                score_shape_board->shape_board_predicted[i_temp][j_temp][1]=chess_shape_sum_temp;
+                score_shape_board->score_board_predicted[i_temp][j_temp]+=evaluate_chess_shape(WHITE,chess_shape_sum_temp);
+            }
+            
+            
+        }
+        
+    }
+    
+    
+}
 
 
+void do_action_and_update(State* state,action_t action ,ScoreShapeBoard* score_shape_board){
+    do_action(state,action);
+    update_score_shape_board(score_shape_board, state->chessboard, action);
+}
 
+bool undo_action_and_update(State* state,ScoreShapeBoard* score_shape_board){
+    action_t last_action=(state->history_actions_num>0)?state->history_actions[state->history_actions_num-1]:NULL_ACTION;
+    if (last_action!=NULL_ACTION)
+    {
+        undo_action(state);
+        update_score_shape_board(score_shape_board, state->chessboard, last_action);
+        return true;
+
+    }
+    else
+    {
+        return false;
+    }
+
+}
 
 
 //TODO: 算杀

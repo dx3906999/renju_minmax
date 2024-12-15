@@ -4,6 +4,7 @@
 #include "referee.h"
 
 typedef int64_t value_t;
+typedef struct ScoreShapeBoard ScoreShapeBoard;
 
 enum CHESS_VALUE {
     forbidden = 0,
@@ -26,6 +27,16 @@ enum OPPOSITE_CHESS_VALUE {
     ops_two_open = 720,
     ops_two_half = 100,
 };
+
+struct ScoreShapeBoard
+{
+    value_t score_board_for_self[CHESSBOARD_LEN][CHESSBOARD_LEN][2];
+    value_t score_board_for_ops[CHESSBOARD_LEN][CHESSBOARD_LEN][2];
+    value_t score_board_predicted[CHESSBOARD_LEN][CHESSBOARD_LEN];
+    chess_shape_t shape_board[CHESSBOARD_LEN][CHESSBOARD_LEN][2];
+    chess_shape_t shape_board_predicted[CHESSBOARD_LEN][CHESSBOARD_LEN][2];
+};
+
 
 value_t evaluate_chess_shape(player_t player, chess_shape_t chess_shape);
 value_t evaluate_chess_shape_for_all(player_t player, chess_shape_t chess_shape, bool is_self);

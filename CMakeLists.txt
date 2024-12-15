@@ -20,4 +20,7 @@ include_directories(${INC_DIR})
 add_executable(renju ${SRC_FILES})
 
 # Compiler flags
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
+# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -m32")
 target_compile_options(renju PRIVATE -Wall -O2 -finput-charset=GBK -fexec-charset=GBK)

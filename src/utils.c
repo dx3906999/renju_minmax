@@ -1,5 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
+#include <string.h>
+
 #include "utils.h"
 
 void swap_heap_node(HeapNode *a, HeapNode *b) {
@@ -46,4 +49,36 @@ void insert_heap(HeapNode heap[], int *size, value_t value, action_t index, int 
 int compare_heap_node(const void *a, const void *b){
     return ((HeapNode*)b)->value - ((HeapNode*)a)->value;
 }
+
+
+hash_t (*init_hash_board())[CHESSBOARD_LEN][2]{
+    hash_t (*hash_board)[CHESSBOARD_LEN][2] = malloc(sizeof(hash_t)*CHESSBOARD_LEN*CHESSBOARD_LEN*2);
+    srand(time(NULL));
+    if (hash_board) 
+    {
+        for (size_t i = 0; i < CHESSBOARD_LEN; i++)
+        {
+            for (size_t j = 0; j < CHESSBOARD_LEN; j++)
+            {
+                for (size_t k = 0; k < 2; k++)
+                {
+                    hash_board[i][j][k]=(hash_t)((((hash_t)rand())<<(sizeof(int)*8))|rand());
+                }
+
+            }
+
+        }
+    }
+
+    return hash_board;
+    
+    
+}
+
+
+hash_t update_hash(hash_t hash_current, hash_t hash_board[CHESSBOARD_LEN][CHESSBOARD_LEN][2], action_t action, player_t player){
+    return hash_current ^ hash_board[action/CHESSBOARD_LEN][action%CHESSBOARD_LEN][player==WHITE?1:0];
+}
+
+
 

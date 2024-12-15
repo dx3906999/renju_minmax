@@ -3,10 +3,15 @@
 
 #include "evaluate.h"
 
+typedef uint64_t hash_t;
+
+
 typedef struct {
     value_t value;
     action_t index;
 } HeapNode;
+
+
 
 void swap_heap_node(HeapNode *a, HeapNode *b);
 void heapify(HeapNode heap[], int size, int root);
