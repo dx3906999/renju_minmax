@@ -173,7 +173,7 @@ void evaluate_board(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], player_
                 }
                 else
                 {
-                    chess_shape_sum_ops=(GET_SHAPE_S(chess_shape_sum_ops,OVERLINE_S)||(GET_SHAPE_S(chess_shape_sum_ops,FOUR_HALF_S)+GET_SHAPE_S(chess_shape_sum_ops,FOUR_HALF_S)>=2)||GET_SHAPE_S(chess_shape_sum_ops,THREE_OPEN_S)>=2)?(chess_shape_sum_ops&TRUE_S):(chess_shape_sum_ops);
+                    chess_shape_sum_ops=(GET_SHAPE_S(chess_shape_sum_ops,OVERLINE_S)||(GET_SHAPE_S(chess_shape_sum_ops,FOUR_HALF_S)+GET_SHAPE_S(chess_shape_sum_ops,FOUR_HALF_S)>=2)||GET_SHAPE_S(chess_shape_sum_ops,THREE_OPEN_S)>=2)?(chess_shape_sum_ops|TRUE_S):(chess_shape_sum_ops);
                 }
                 
                 
@@ -231,7 +231,7 @@ value_t evaluate_whole_board(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN]
                 chess_shape_sum_ops=chess_shape_ops[0]+chess_shape_ops[1]+chess_shape_ops[2]+chess_shape_ops[3];
                 if (player==BLACK)
                 {
-                    chess_shape_sum_ops=(GET_SHAPE_S(chess_shape_sum_ops,OVERLINE_S)||(GET_SHAPE_S(chess_shape_sum_ops,FOUR_HALF_S)+GET_SHAPE_S(chess_shape_sum_ops,FOUR_HALF_S)>=2)||GET_SHAPE_S(chess_shape_sum_ops,THREE_OPEN_S)>=2)?(chess_shape_sum_ops&TRUE_S):(chess_shape_sum_ops);
+                    chess_shape_sum_ops=(GET_SHAPE_S(chess_shape_sum_ops,OVERLINE_S)||(GET_SHAPE_S(chess_shape_sum_ops,FOUR_HALF_S)+GET_SHAPE_S(chess_shape_sum_ops,FOUR_HALF_S)>=2)||GET_SHAPE_S(chess_shape_sum_ops,THREE_OPEN_S)>=2)?(chess_shape_sum_ops|TRUE_S):(chess_shape_sum_ops);
                 }
 
                 score-=evaluate_chess_shape_for_all(OPS_PLAYER(player),chess_shape_sum_ops,false);
@@ -265,8 +265,8 @@ void score_pos_distribution(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN],
     
 }
 
-value_t score_pos_distribution_single(int i_center, int j_center, value_t center_value, value_t damping){
-    return (value_t)MAX(0,(center_value-damping*(abs(i_center)+abs(j_center))));
+value_t score_pos_distribution_single(int i_center, int j_center, int i_pos, int j_pos, value_t center_value, value_t damping){
+    return (value_t)MAX(0,(center_value-damping*(abs(i_pos-i_center)+abs(j_pos-j_center))));
 }
 
 void display_score_board(value_t score_board_output[CHESSBOARD_LEN][CHESSBOARD_LEN]){
@@ -338,6 +338,7 @@ void update_score_shape_board(ScoreShapeBoard* score_shape_board, player_t chess
         // ^ 根据不同的player更新分数
         score_shape_board->score_board_for_self[i_action][j_action][chessboard[i_action][j_action]==BLACK?0:1]=evaluate_chess_shape_for_all(chessboard[i_action][j_action],chess_shape_sum_temp,true);
         score_shape_board->score_board_for_ops[i_action][j_action][chessboard[i_action][j_action]==BLACK?0:1]=evaluate_chess_shape_for_all(chessboard[i_action][j_action],chess_shape_sum_temp,false);
+        score_shape_board->score_board_predicted[i_action][j_action]=0;
     }
     else
     {
@@ -359,6 +360,7 @@ void update_score_shape_board(ScoreShapeBoard* score_shape_board, player_t chess
         score_shape_board->shape_board_predicted[i_action][j_action][1]=chess_shape_sum_temp;
 
         score_shape_board->score_board_predicted[i_action][j_action]+=evaluate_chess_shape(WHITE,chess_shape_sum_temp);
+        score_shape_board->score_board_predicted[i_action][j_action]+=score_pos_distribution_single(CHESSBOARD_LEN/2,CHESSBOARD_LEN/2,i_action,j_action,20,1);
     }
 
     // update score
@@ -386,7 +388,7 @@ void update_score_shape_board(ScoreShapeBoard* score_shape_board, player_t chess
                 // ^ 根据不同的player更新分数
                 score_shape_board->score_board_for_self[i_temp][j_temp][chessboard[i_temp][j_temp]==BLACK?0:1]=evaluate_chess_shape_for_all(chessboard[i_temp][j_temp],chess_shape_sum_temp,true);
                 score_shape_board->score_board_for_ops[i_temp][j_temp][chessboard[i_temp][j_temp]==BLACK?0:1]=evaluate_chess_shape_for_all(chessboard[i_temp][j_temp],chess_shape_sum_temp,false);
-
+                score_shape_board->score_board_predicted[i_temp][j_temp]=0;
                 
             }
             else
@@ -418,6 +420,7 @@ void update_score_shape_board(ScoreShapeBoard* score_shape_board, player_t chess
 
                 score_shape_board->shape_board_predicted[i_temp][j_temp][1]=chess_shape_sum_temp;
                 score_shape_board->score_board_predicted[i_temp][j_temp]+=evaluate_chess_shape(WHITE,chess_shape_sum_temp);
+                score_shape_board->score_board_predicted[i_temp][j_temp]+=score_pos_distribution_single(CHESSBOARD_LEN/2,CHESSBOARD_LEN/2,i_temp,j_temp,20,1);
             }
             
             
@@ -425,6 +428,21 @@ void update_score_shape_board(ScoreShapeBoard* score_shape_board, player_t chess
         
     }
     
+    
+}
+
+
+value_t get_score_from_ssboard(ScoreShapeBoard* ssboard, player_t player){
+    value_t score=0;
+    for (size_t i = 0; i < CHESSBOARD_LEN; i++)
+    {
+        for (size_t j = 0; j < CHESSBOARD_LEN; j++)
+        {
+            score+=ssboard->score_board_for_self[i][j][player==BLACK?0:1]-ssboard->score_board_for_ops[i][j][OPS_PLAYER(player)==BLACK?0:1];
+        }
+        
+    }
+    return score;
     
 }
 
@@ -450,6 +468,16 @@ bool undo_action_and_update(State* state,ScoreShapeBoard* score_shape_board){
 
 }
 
+ScoreShapeBoard* init_score_shape_board(){
+    ScoreShapeBoard* score_shape_board=(ScoreShapeBoard*)malloc(sizeof(ScoreShapeBoard));
+    if (score_shape_board)
+    {
+        memset(score_shape_board,0,sizeof(ScoreShapeBoard));
+    }
+
+    return score_shape_board;
+    
+}
 
 //TODO: 算杀
 

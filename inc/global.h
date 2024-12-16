@@ -23,6 +23,8 @@ extern "C" {
 #define NULL_ACTION 255
 #define MAX_ACTIONS_IN_ONE_STEP 10
 #define MAX_SEARCH_DEPTH 8
+#define MAX_KILLER_ACTIONS_IN_ONE_STEP 5
+#define MAX_KILLER_SEARCH_DEPTH 12
 
 typedef char player_t;
 //typedef int bool;

@@ -2,6 +2,7 @@
 #define EVALUATE_H
 #include "global.h"
 #include "referee.h"
+#include "state.h"
 
 typedef int64_t value_t;
 typedef struct ScoreShapeBoard ScoreShapeBoard;
@@ -46,5 +47,13 @@ value_t evaluate_whole_board(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN]
 void choose_max_score_pos(value_t score_board_output[CHESSBOARD_LEN][CHESSBOARD_LEN], int* i_output, int* j_output);
 void display_score_board(value_t score_board_output[CHESSBOARD_LEN][CHESSBOARD_LEN]);
 void score_pos_distribution(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN],value_t score_board_output[CHESSBOARD_LEN][CHESSBOARD_LEN], int i_center, int j_center, value_t center_value, value_t damping);
-value_t score_pos_distribution_single(int i_center, int j_center, value_t center_value, value_t damping);
+value_t score_pos_distribution_single(int i_center, int j_center, int i_pos, int j_pos, value_t center_value, value_t damping);
+void update_score_shape_board(ScoreShapeBoard* score_shape_board, player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], action_t action);
+void do_action_and_update(State* state,action_t action ,ScoreShapeBoard* score_shape_board);
+bool undo_action_and_update(State* state,ScoreShapeBoard* score_shape_board);
+value_t get_score_from_ssboard(ScoreShapeBoard* ssboard, player_t player);
+ScoreShapeBoard* init_score_shape_board();
+// value_t get_score_from_ssboard(ScoreShapeBoard* ssboard, player_t player);
+
+
 #endif // EVALUATE_H
