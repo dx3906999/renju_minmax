@@ -12,6 +12,7 @@
 #include "evaluate.h"
 #include "minmax.h"
 #include "utils.h"
+#include "thread_pool.h"
 
 const int i_direction[8]={1,-1,0,0,1,-1,1,-1};
 const int j_direction[8]={0,0,1,-1,1,-1,-1,1};
@@ -304,7 +305,8 @@ void human_vs_black_ai(){
     printf("\x1b[0m\x1b[1;32mHuman vs AI (black) mode.\n\x1b[0m");
     printf("%ls is black and %ls is white.\n",BLACK_STR,WHITE_STR);
     State* board_state=init_state();
-    ScoreShapeBoard* ssboard=init_score_shape_board();
+    // ScoreShapeBoard* ssboard=init_score_shape_board();
+    ThreadPool* pool=init_thread_pool(10);
     bool input_state=true;
     int i_input,j_input;
     int is_winner_state=0;
@@ -321,9 +323,10 @@ void human_vs_black_ai(){
         else
         {
             // action_t ai_action=choose_action(board_state,BLACK);
-            action_t ai_action=choose_action_with_iterative_deepening(board_state,BLACK);
+            // action_t ai_action=choose_action_with_iterative_deepening(board_state,BLACK);
             // action_t ai_action=choose_action_with_iterative_deepening_with_ssboard(board_state,ssboard,BLACK);
             // action_t ai_action=choose_action_sum(board_state,BLACK);
+            action_t ai_action=choose_action_with_iterative_deepening_and_thread(board_state,BLACK,pool);
             i_input=ai_action/CHESSBOARD_LEN;
             j_input=ai_action%CHESSBOARD_LEN;
         }
@@ -394,7 +397,8 @@ void human_vs_black_ai(){
     }
 
     free(board_state);
-    free(ssboard);
+    threadpool_destroy(pool,0);
+    // free(ssboard);
 
 }
 

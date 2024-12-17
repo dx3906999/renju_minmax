@@ -1,10 +1,11 @@
 #include <stdlib.h>
-
+#include <string.h>
 #include "minmax.h"
 #include "evaluate.h"
 #include "global.h"
 #include "utils.h"
 #include "state.h"
+#include "thread_pool.h"
 
 void get_prob_actions(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], action_t prob_actions_output[MAX_ACTIONS_IN_ONE_STEP], player_t player){
     HeapNode heap[MAX_ACTIONS_IN_ONE_STEP]={0};
@@ -437,4 +438,103 @@ action_t choose_action_sum(State* state, player_t player){
     
     return action;
 }
+
+
+#pragma region multi-thread
+
+action_t choose_action_with_iterative_deepening_and_thread(State* state, player_t player, ThreadPool* thread_pool){
+    value_t best_score=INT64_MIN;
+    action_t best_action=NULL_ACTION;
+    action_t prob_actions[MAX_ACTIONS_IN_ONE_STEP]={0};
+    get_prob_actions(state->chessboard,prob_actions,player);
+    value_t score_table[MAX_ACTIONS_IN_ONE_STEP]={0};
+    SearchArgs* args[MAX_ACTIONS_IN_ONE_STEP]={0};
+
+    size_t valid_actions_num=0;
+    for (size_t i = 0; i < MAX_ACTIONS_IN_ONE_STEP && prob_actions[i]!=NULL_ACTION; i++)
+    {
+        valid_actions_num++;
+    }
+    
+
+    for (size_t i = 0; i < valid_actions_num; i++)
+    {
+        args[i]=malloc(sizeof(SearchArgs));
+        args[i]->state=init_state();
+        memcpy(args[i]->state,state,sizeof(State));
+        args[i]->score=&(score_table[i]);
+        score_table[i]=INT64_MIN;
+        args[i]->player=player;
+        args[i]->action=prob_actions[i];
+        args[i]->depth=0;
+    }
+    
+
+    // for (size_t i = 0; i < MAX_ACTIONS_IN_ONE_STEP; i++)
+    // {
+    //     print_action(prob_actions[i]);
+    //     printf(" ");
+    // }
+    // printf("\n");
+    
+
+    for (size_t depth = 2; depth <= MAX_SEARCH_DEPTH; depth+=2)
+    {
+        memset(score_table,1,sizeof(score_table));
+        
+        pthread_mutex_lock(&thread_pool->lock);
+        thread_pool->task_finished_num_target=thread_pool->task_finished_num_target+valid_actions_num;
+        pthread_mutex_unlock(&thread_pool->lock);
+        
+        for (size_t i = 0; i < valid_actions_num; i++)
+        {
+            args[i]->depth=depth;
+            push_task(thread_pool,search_one_step_with_thread,args[i]);
+        }
+
+        // wait for all tasks to finish
+
+        pthread_mutex_lock(&thread_pool->lock);
+        while (thread_pool->task_finished_num!=thread_pool->task_finished_num_target)
+        {
+            pthread_cond_wait(&(thread_pool->task_done), &(thread_pool->lock));
+        }
+        pthread_mutex_unlock(&thread_pool->lock);
+
+        for (size_t i = 0; i < valid_actions_num; i++)
+        {
+            if (score_table[i]>five)
+            {
+                return prob_actions[i];
+            }
+            
+        }
+        
+    }
+
+    for (size_t i = 0; i < MAX_ACTIONS_IN_ONE_STEP; i++)
+    {
+        if (score_table[i]>best_score)
+        {
+            best_score=score_table[i];
+            best_action=prob_actions[i];
+        }
+        
+    }
+    
+
+    return best_action;
+    
+}
+
+
+void search_one_step_with_thread(void* args){
+    SearchArgs* search_args=(SearchArgs*)args;
+    do_action(search_args->state,search_args->action);
+    *(search_args->score)=alpha_beta_search(search_args->depth-1,search_args->state,INT64_MIN,INT64_MAX,false,search_args->player);
+    undo_action(search_args->state);
+}
+
+#pragma endregion
+
 

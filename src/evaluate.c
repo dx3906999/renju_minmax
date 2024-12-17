@@ -198,6 +198,61 @@ void evaluate_board(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], player_
     
 }
 
+
+void evaluate_board_for_killer(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], player_t player, value_t score_board_output[CHESSBOARD_LEN][CHESSBOARD_LEN], chess_shape_t shape_board_output[CHESSBOARD_LEN][CHESSBOARD_LEN][2]){
+    int chess_state[8][15]={0};
+    chess_shape_t chess_shape_player[4]={0};
+    chess_shape_t chess_shape_ops[4]={0};
+    chess_shape_t chess_shape_sum_player=0;
+    chess_shape_t chess_shape_sum_ops=0;
+    for (size_t i = 0; i < CHESSBOARD_LEN; i++)
+    {
+        for (size_t j = 0; j < CHESSBOARD_LEN; j++)
+        {
+
+
+            if (chessboard[i][j]== EMPTY)
+            {
+                memset(chess_shape_player,0,sizeof(chess_shape_player));
+                memset(chess_shape_ops,0,sizeof(chess_shape_ops));
+                chess_shape_sum_player=0;
+                chess_shape_sum_ops=0;
+
+                memset(chess_state,0,sizeof(chess_state));
+                scan_chess_state(chessboard,i,j,chess_state,player);
+                analyze_chess_state(chess_state,chess_shape_player,chessboard,i,j,player);
+                memset(chess_state,0,sizeof(chess_state));
+                scan_chess_state(chessboard,i,j,chess_state,OPS_PLAYER(player));
+                analyze_chess_state(chess_state,chess_shape_ops,chessboard,i,j,OPS_PLAYER(player));
+                chess_shape_sum_player=chess_shape_player[0]+chess_shape_player[1]+chess_shape_player[2]+chess_shape_player[3];
+                chess_shape_sum_ops=chess_shape_ops[0]+chess_shape_ops[1]+chess_shape_ops[2]+chess_shape_ops[3];
+                if (player==BLACK)
+                {
+                    chess_shape_sum_player=(GET_SHAPE_S(chess_shape_sum_player,OVERLINE_S)||(GET_SHAPE_S(chess_shape_sum_player,FOUR_HALF_S)+GET_SHAPE_S(chess_shape_sum_player,FOUR_HALF_S)>=2)||GET_SHAPE_S(chess_shape_sum_player,THREE_OPEN_S)>=2)?(chess_shape_sum_player|TRUE_S):(chess_shape_sum_player);
+                }
+                else
+                {
+                    chess_shape_sum_ops=(GET_SHAPE_S(chess_shape_sum_ops,OVERLINE_S)||(GET_SHAPE_S(chess_shape_sum_ops,FOUR_HALF_S)+GET_SHAPE_S(chess_shape_sum_ops,FOUR_HALF_S)>=2)||GET_SHAPE_S(chess_shape_sum_ops,THREE_OPEN_S)>=2)?(chess_shape_sum_ops|TRUE_S):(chess_shape_sum_ops);
+                }
+                
+                shape_board_output[i][j][0]=(player==BLACK)?(chess_shape_sum_player):(chess_shape_sum_ops);
+                shape_board_output[i][j][1]=(player==BLACK)?(chess_shape_sum_ops):(chess_shape_sum_player);
+                score_board_output[i][j]=evaluate_chess_shape(player,chess_shape_sum_player)+evaluate_chess_shape(OPS_PLAYER(player),chess_shape_sum_ops);
+            }
+            else
+            {
+                score_board_output[i][j]=0;
+            }
+            
+        }
+        
+    }
+
+    score_pos_distribution(chessboard,score_board_output,CHESSBOARD_LEN/2,CHESSBOARD_LEN/2,20,1);
+    
+}
+
+
 value_t evaluate_whole_board(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], player_t player){
     int chess_state[8][15]={0};
     chess_shape_t chess_shape_player[4]={0};
