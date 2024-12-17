@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
-
+#include <ctype.h>
 #include "utils.h"
 
 void swap_heap_node(HeapNode *a, HeapNode *b) {
@@ -80,5 +80,21 @@ hash_t update_hash(hash_t hash_current, hash_t hash_board[CHESSBOARD_LEN][CHESSB
     return hash_current ^ hash_board[action/CHESSBOARD_LEN][action%CHESSBOARD_LEN][player==WHITE?1:0];
 }
 
+void store_history_to_file(action_t action, FILE* fp){
+    fprintf(fp, "%c%d\n", 'A'+(action%CHESSBOARD_LEN), CHESSBOARD_LEN-action/CHESSBOARD_LEN);
+}
 
+void restore_history_from_file(FILE* fp, State* state){
+    int x=-1;
+    char y=-1;
+    while (fscanf(fp,"%c%d\n",&y,&x)==2)
+    {
+        do_action(state,(CHESSBOARD_LEN-x)*CHESSBOARD_LEN+(action_t)((char)toupper(y)-'A'));
+    }
+    
 
+}
+
+void print_action(action_t action){
+    printf("%c%d", 'A'+(action%CHESSBOARD_LEN), CHESSBOARD_LEN-action/CHESSBOARD_LEN);
+}

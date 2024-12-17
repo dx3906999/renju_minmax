@@ -259,6 +259,14 @@ action_t choose_action_with_iterative_deepening(State* state, player_t player){
     action_t prob_actions[MAX_ACTIONS_IN_ONE_STEP]={0};
     get_prob_actions(state->chessboard,prob_actions,player);
 
+    // for (size_t i = 0; i < MAX_ACTIONS_IN_ONE_STEP; i++)
+    // {
+    //     print_action(prob_actions[i]);
+    //     printf(" ");
+    // }
+    // printf("\n");
+    
+
     for (size_t depth = 2; depth <= MAX_SEARCH_DEPTH; depth+=2)
     {
         for (size_t i = 0; i < MAX_ACTIONS_IN_ONE_STEP; i++)

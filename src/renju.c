@@ -11,6 +11,7 @@
 #include "referee.h"
 #include "evaluate.h"
 #include "minmax.h"
+#include "utils.h"
 
 const int i_direction[8]={1,-1,0,0,1,-1,1,-1};
 const int j_direction[8]={0,0,1,-1,1,-1,-1,1};
@@ -69,6 +70,9 @@ int main(int argc, char const *argv[])
         case 4:
             exit(0);
             break;
+        case 999:
+            printf("debug mode.\n");
+            debug_mode();
         default:
             printf("invalid choice.\n");
             break;
@@ -482,5 +486,107 @@ void human_vs_white_ai(){
 
     free(board_state);
 
+}
+
+
+void debug_mode(){
+    FILE* fp=fopen("D:\\C\\renju_minmax\\temp_history_actions.txt","r");
+    State* board_state=init_state();
+    restore_history_from_file(fp,board_state);
+    // display_board(board_state->chessboard,(board_state->history_actions_num-2+board_state->history_actions_num%2>=0)?(board_state->history_actions[board_state->history_actions_num-2+board_state->history_actions_num%2]):(NULL_ACTION),(board_state->history_actions_num-1+board_state->history_actions_num%2>=0)?(board_state->history_actions[board_state->history_actions_num-1+board_state->history_actions_num%2]):(NULL_ACTION));
+    // printf("black ai analysis:\n");
+    // do_action(board_state,choose_action_with_iterative_deepening(board_state,BLACK));
+    // display_board(board_state->chessboard,(board_state->history_actions_num-2+board_state->history_actions_num%2>=0)?(board_state->history_actions[board_state->history_actions_num-2+board_state->history_actions_num%2]):(NULL_ACTION),(board_state->history_actions_num-1+board_state->history_actions_num%2>=0)?(board_state->history_actions[board_state->history_actions_num-1+board_state->history_actions_num%2]):(NULL_ACTION));
+    fclose(fp);
+
+    bool input_state=true;
+    int i_input,j_input;
+    int is_winner_state=0;
+
+    while(true){
+
+        display_board(board_state->chessboard,(board_state->history_actions_num-2>=0)?(board_state->history_actions[board_state->history_actions_num-2]):(NULL_ACTION),(board_state->history_actions_num-1>=0)?(board_state->history_actions[board_state->history_actions_num-1]):(NULL_ACTION));
+        printf("Round %d:black's (%ls %ls) turn.\n",board_state->history_actions_num/2+1,BLACK_STR,BLACK_LAST_STR);
+        if (board_state->history_actions_num==0)
+        {
+            i_input=CHESSBOARD_LEN/2;
+            j_input=CHESSBOARD_LEN/2;
+        }
+        else
+        {
+            // action_t ai_action=choose_action(board_state,BLACK);
+            action_t ai_action=choose_action_with_iterative_deepening(board_state,BLACK);
+            // action_t ai_action=choose_action_with_iterative_deepening_with_ssboard(board_state,ssboard,BLACK);
+            // action_t ai_action=choose_action_sum(board_state,BLACK);
+            i_input=ai_action/CHESSBOARD_LEN;
+            j_input=ai_action%CHESSBOARD_LEN;
+        }
+        do_action(board_state,i_input*CHESSBOARD_LEN+j_input);
+        // do_action_and_update(board_state,i_input*CHESSBOARD_LEN+j_input,ssboard);
+        printf("AI move: %c%d\n",'A'+j_input,15-i_input);
+        is_winner_state=is_winner(board_state->chessboard,OPS_PLAYER(board_state->current_player),board_state->history_actions[board_state->history_actions_num-1]/CHESSBOARD_LEN,board_state->history_actions[board_state->history_actions_num-1]%CHESSBOARD_LEN);
+        if (is_winner_state==2)
+        {
+            printf("Black loses.\n");
+            display_board(board_state->chessboard,(board_state->history_actions_num-1>=0)?(board_state->history_actions[board_state->history_actions_num-1]):(NULL_ACTION),(board_state->history_actions_num-2>=0)?(board_state->history_actions[board_state->history_actions_num-2]):(NULL_ACTION));
+            return;
+        }
+        else if (is_winner_state==1)
+        {
+            printf("Black wins!\n");
+            display_board(board_state->chessboard,(board_state->history_actions_num-1>=0)?(board_state->history_actions[board_state->history_actions_num-1]):(NULL_ACTION),(board_state->history_actions_num-2>=0)?(board_state->history_actions[board_state->history_actions_num-2]):(NULL_ACTION));
+            return;
+        }
+        else if (chessboard_is_full(board_state->chessboard))
+        {
+            printf("The chessboard is full!\nTie.\n");
+            display_board(board_state->chessboard,(board_state->history_actions_num-1>=0)?(board_state->history_actions[board_state->history_actions_num-1]):(NULL_ACTION),(board_state->history_actions_num-2>=0)?(board_state->history_actions[board_state->history_actions_num-2]):(NULL_ACTION));
+            return;
+        }
+
+
+        do
+        {
+            display_board(board_state->chessboard,(board_state->history_actions_num-1>=0)?(board_state->history_actions[board_state->history_actions_num-1]):(NULL_ACTION),(board_state->history_actions_num-2>=0)?(board_state->history_actions[board_state->history_actions_num-2]):(NULL_ACTION));
+            printf("Round %d:white's (%ls %ls) turn.\n",board_state->history_actions_num/2+1,WHITE_STR,WHITE_LAST_STR);
+            printf("Please input the position of your chess piece, such as 'a1' or 'A1'.\n");
+            // printf("value: %" PRId64 "\n",evaluate_whole_board(board_state->chessboard,board_state->current_player));
+            input_state=get_move_input(&i_input,&j_input);
+            if (input_state)
+            {
+                input_state=check_move_input_is_valid(board_state->chessboard,i_input,j_input);
+                if (input_state)
+                {
+                    do_action(board_state,i_input*CHESSBOARD_LEN+j_input);
+                    // do_action_and_update(board_state,i_input*CHESSBOARD_LEN+j_input,ssboard);
+                    is_winner_state=is_winner(board_state->chessboard,OPS_PLAYER(board_state->current_player),board_state->history_actions[board_state->history_actions_num-1]/CHESSBOARD_LEN,board_state->history_actions[board_state->history_actions_num-1]%CHESSBOARD_LEN);
+                    if (is_winner_state)
+                    {
+                        printf("White won!\n");
+                        display_board(board_state->chessboard,(board_state->history_actions_num-2>=0)?(board_state->history_actions[board_state->history_actions_num-2]):(NULL_ACTION),(board_state->history_actions_num-1>=0)?(board_state->history_actions[board_state->history_actions_num-1]):(NULL_ACTION));
+                        return;
+                    }
+                    else if (chessboard_is_full(board_state->chessboard))
+                    {
+                        printf("The chessboard is full!\nTie.\n");
+                        display_board(board_state->chessboard,(board_state->history_actions_num-2>=0)?(board_state->history_actions[board_state->history_actions_num-2]):(NULL_ACTION),(board_state->history_actions_num-1>=0)?(board_state->history_actions[board_state->history_actions_num-1]):(NULL_ACTION));
+                        return;
+                    }
+                    
+                    
+                }
+                else
+                {
+                    printf("please enter a valid action.\n");
+                }
+                
+                
+            }
+            
+        } while (!input_state);
+
+    }
+
+    free(board_state);
 }
 

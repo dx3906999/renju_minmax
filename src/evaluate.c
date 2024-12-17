@@ -59,10 +59,7 @@ value_t evaluate_chess_shape(player_t player, chess_shape_t chess_shape){
         
     }
 
-    if (GET_SHAPE_S(chess_shape,four_half)+GET_SHAPE_S(chess_shape,three_open)+GET_SHAPE_S(chess_shape,four_open)>=2)
-    {
-        score+=four_open;
-    }
+
     
 
     
@@ -76,7 +73,16 @@ value_t evaluate_chess_shape_for_all(player_t player, chess_shape_t chess_shape,
     {
         if (GET_TF_S(chess_shape))
         {
-            score = forbidden;
+            if (is_self)
+            {
+                score-=ops_five;
+            }
+            else
+            {
+                score+=five;
+            }
+            
+            
         }
         else
         {
@@ -188,7 +194,7 @@ void evaluate_board(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], player_
         
     }
 
-    score_pos_distribution(chessboard,score_board_output,CHESSBOARD_LEN/2,CHESSBOARD_LEN/2,100,1);
+    score_pos_distribution(chessboard,score_board_output,CHESSBOARD_LEN/2,CHESSBOARD_LEN/2,20,1);
     
 }
 

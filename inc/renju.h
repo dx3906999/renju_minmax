@@ -13,5 +13,5 @@ void signal_handle(int signum);
 void human_vs_human();
 void human_vs_black_ai();
 void human_vs_white_ai();
-
+void debug_mode();
 #endif
