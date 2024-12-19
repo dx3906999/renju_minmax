@@ -306,7 +306,7 @@ void human_vs_black_ai(){
     printf("%ls is black and %ls is white.\n",BLACK_STR,WHITE_STR);
     State* board_state=init_state();
     // ScoreShapeBoard* ssboard=init_score_shape_board();
-    ThreadPool* pool=init_thread_pool(10);
+    ThreadPool* pool=init_thread_pool(MAX_ACTIONS_IN_ONE_STEP);
     bool input_state=true;
     int i_input,j_input;
     int is_winner_state=0;
@@ -407,6 +407,7 @@ void human_vs_white_ai(){
     printf("\x1b[0m\x1b[1;32mHuman vs AI (white) mode.\n\x1b[0m");
     printf("%ls is black and %ls is white.\n",BLACK_STR,WHITE_STR);
     State* board_state=init_state();
+    ThreadPool* pool=init_thread_pool(MAX_ACTIONS_IN_ONE_STEP);
     bool input_state=true;
     int i_input,j_input;
     int is_winner_state=0;
@@ -465,8 +466,9 @@ void human_vs_white_ai(){
         // choose_max_score_pos(score_board,&i_input,&j_input);
 
         // action_t ai_action=choose_action(board_state,WHITE);
-        action_t ai_action=choose_action_with_iterative_deepening(board_state,WHITE);
+        // action_t ai_action=choose_action_with_iterative_deepening(board_state,WHITE);
         // action_t ai_action=choose_action_sum(board_state,WHITE);
+        action_t ai_action=choose_action_with_iterative_deepening_and_thread(board_state,WHITE,pool);
         i_input=ai_action/CHESSBOARD_LEN;
         j_input=ai_action%CHESSBOARD_LEN;
 
@@ -489,6 +491,7 @@ void human_vs_white_ai(){
     }
 
     free(board_state);
+    threadpool_destroy(pool,0);
 
 }
 
