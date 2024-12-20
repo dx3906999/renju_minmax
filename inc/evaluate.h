@@ -11,7 +11,7 @@ enum CHESS_VALUE {
     forbidden = 0,
     five = 50000,
     four_open = 4320,
-    four_half = 720,
+    four_half = 880,
     three_open = 720,
     three_half = 100,
     two_open = 120,
@@ -25,7 +25,7 @@ enum OPPOSITE_CHESS_VALUE {
     ops_four_half = 38000,
     ops_three_open = 3500,
     ops_three_half = 720,
-    ops_two_open = 720,
+    ops_two_open = 540,
     ops_two_half = 100,
 };
 
@@ -53,6 +53,7 @@ void do_action_and_update(State* state,action_t action ,ScoreShapeBoard* score_s
 bool undo_action_and_update(State* state,ScoreShapeBoard* score_shape_board);
 value_t get_score_from_ssboard(ScoreShapeBoard* ssboard, player_t player);
 ScoreShapeBoard* init_score_shape_board();
+void evaluate_board_for_killer(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], player_t player, value_t score_board_output[CHESSBOARD_LEN][CHESSBOARD_LEN], chess_shape_t shape_board_output[CHESSBOARD_LEN][CHESSBOARD_LEN][2]);
 // value_t get_score_from_ssboard(ScoreShapeBoard* ssboard, player_t player);
 
 

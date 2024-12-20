@@ -43,10 +43,12 @@ void get_prob_actions(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], actio
 }
 
 
-void get_prob_actions_for_killer(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], action_t prob_actions_output[MAX_KILLER_ACTIONS_IN_ONE_STEP], player_t player){
-    HeapNode heap[MAX_KILLER_ACTIONS_IN_ONE_STEP]={0};
+void get_prob_actions_and_shape(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], action_t prob_actions_output[MAX_ACTIONS_IN_ONE_STEP], chess_shape_t prob_shapes_output[MAX_ACTIONS_IN_ONE_STEP][2],player_t player){
+    HeapNode heap[MAX_ACTIONS_IN_ONE_STEP]={0};
     value_t score_board[CHESSBOARD_LEN][CHESSBOARD_LEN]={0};
-    evaluate_board(chessboard,player,score_board);
+    chess_shape_t shape_board[CHESSBOARD_LEN][CHESSBOARD_LEN][2]={0};
+    // evaluate_board(chessboard,player,score_board);
+    evaluate_board_for_killer(chessboard,player,score_board,shape_board);
     int heap_size=0;
     // size_t temp_index=0;
     
@@ -54,22 +56,21 @@ void get_prob_actions_for_killer(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_
     {
         for (size_t j = 0; j < CHESSBOARD_LEN; j++)
         {
-            if (score_board[i][j]>three_open)
-            {
-                insert_heap(heap,&heap_size,score_board[i][j],(action_t)(i*CHESSBOARD_LEN+j),MAX_ACTIONS_IN_ONE_STEP);
-            }
-            
+            insert_heap(heap,&heap_size,score_board[i][j],(action_t)(i*CHESSBOARD_LEN+j),MAX_ACTIONS_IN_ONE_STEP);
         }
         
     }
 
     qsort(heap,heap_size,sizeof(HeapNode),compare_heap_node);
     
-    for (size_t i = 0; i < MAX_KILLER_ACTIONS_IN_ONE_STEP; i++)
+    for (size_t i = 0; i < MAX_ACTIONS_IN_ONE_STEP; i++)
     {
         if (heap[i].value>0)
         {
             prob_actions_output[i]=heap[i].index;
+            prob_shapes_output[i][0]=shape_board[heap[i].index/CHESSBOARD_LEN][heap[i].index%CHESSBOARD_LEN][0];
+            prob_shapes_output[i][1]=shape_board[heap[i].index/CHESSBOARD_LEN][heap[i].index%CHESSBOARD_LEN][1];
+
         }
         else
         {
@@ -81,6 +82,60 @@ void get_prob_actions_for_killer(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_
     
     
 }
+
+
+
+// void get_prob_actions_for_killer(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], action_t prob_actions_output[MAX_ACTIONS_IN_ONE_STEP], action_t prob_actions_killer_output[MAX_KILLER_ACTIONS_IN_ONE_STEP][2], player_t player){
+//     HeapNode heap[MAX_KILLER_ACTIONS_IN_ONE_STEP]={0};
+//     value_t score_board[CHESSBOARD_LEN][CHESSBOARD_LEN]={0};
+//     chess_shape_t shape_board[CHESSBOARD_LEN][CHESSBOARD_LEN][2]={0};
+//     evaluate_board_for_killer(chessboard,player,score_board,shape_board);
+//     // evaluate_board(chessboard,player,score_board);
+//     int heap_size=0;
+//     // size_t temp_index=0;
+    
+//     for (size_t i = 0; i < CHESSBOARD_LEN; i++)
+//     {
+//         for (size_t j = 0; j < CHESSBOARD_LEN; j++)
+//         {
+//             if (score_board[i][j]>three_open)
+//             {
+//                 insert_heap(heap,&heap_size,score_board[i][j],(action_t)(i*CHESSBOARD_LEN+j),MAX_ACTIONS_IN_ONE_STEP);
+//             }
+            
+//         }
+        
+//     }
+
+//     qsort(heap,heap_size,sizeof(HeapNode),compare_heap_node);
+    
+//     for (size_t i = 0; i < MAX_ACTIONS_IN_ONE_STEP; i++)
+//     {
+//         if (heap[i].value>0)
+//         {
+//             prob_actions_output[i]=heap[i].index;
+//         }
+//         else
+//         {
+//             prob_actions_output[i]=NULL_ACTION;
+//         }
+        
+        
+//     }
+
+//     for (size_t i = 0; i < CHESSBOARD_LEN; i++)
+//     {
+//         for (size_t j = 0; j < CHESSBOARD_LEN; j++)
+//         {
+            
+//         }
+        
+//     }
+    
+    
+    
+    
+// }
 
 
 
@@ -127,13 +182,19 @@ value_t alpha_beta_search(int depth,State* state ,value_t alpha, value_t beta, b
     }
 
     action_t prob_actions[MAX_ACTIONS_IN_ONE_STEP]={0};
-    get_prob_actions(state->chessboard,prob_actions,player);
+    chess_shape_t prob_shapes[MAX_ACTIONS_IN_ONE_STEP][2]={0};
+    get_prob_actions_and_shape(state->chessboard,prob_actions,prob_shapes,player);
 
     if (is_max)
     {
         value_t max_value=INT64_MIN;
         for (size_t i = 0; i < MAX_ACTIONS_IN_ONE_STEP && prob_actions[i]!=NULL_ACTION; i++)
         {
+            if (GET_SHAPE_S(prob_shapes[i][player==BLACK?0:1],FOUR_HALF_S)!=0&&!GET_TF_S(prob_shapes[i][player==BLACK?0:1]))
+            {
+                depth+=2;
+            }
+            
             do_action(state,prob_actions[i]);
             value_t temp_value=alpha_beta_search(depth-1,state,alpha,beta,false,player);
             undo_action(state);
@@ -154,6 +215,12 @@ value_t alpha_beta_search(int depth,State* state ,value_t alpha, value_t beta, b
         value_t min_value=INT64_MAX;
         for (size_t i = 0; i < MAX_ACTIONS_IN_ONE_STEP && prob_actions[i]!=NULL_ACTION; i++)
         {
+
+            if (GET_SHAPE_S(prob_shapes[i][player==BLACK?0:1],FOUR_HALF_S)!=0&&!GET_TF_S(prob_shapes[i][player==BLACK?0:1]))
+            {
+                depth+=2;
+            }
+
             do_action(state,prob_actions[i]);
             value_t temp_value=alpha_beta_search(depth-1,state,alpha,beta,true,player);
             undo_action(state);
@@ -174,59 +241,59 @@ value_t alpha_beta_search(int depth,State* state ,value_t alpha, value_t beta, b
 }
 
 
-value_t alpha_beta_search_for_killer(int depth,State* state ,value_t alpha, value_t beta, bool is_max, player_t player){
-    value_t score=evaluate_whole_board(state->chessboard,player);
+// value_t alpha_beta_search_for_killer(int depth,State* state ,value_t alpha, value_t beta, bool is_max, player_t player){
+//     value_t score=evaluate_whole_board(state->chessboard,player);
 
-    if(depth==0 || state->history_actions_num==CHESSBOARD_SIZE || (state->history_actions_num>0 && is_winner(state->chessboard,OPS_PLAYER(state->current_player),state->history_actions[state->history_actions_num-1]/CHESSBOARD_LEN,state->history_actions[state->history_actions_num-1]%CHESSBOARD_LEN))){
-        return score;
-    }
+//     if(depth==0 || state->history_actions_num==CHESSBOARD_SIZE || (state->history_actions_num>0 && is_winner(state->chessboard,OPS_PLAYER(state->current_player),state->history_actions[state->history_actions_num-1]/CHESSBOARD_LEN,state->history_actions[state->history_actions_num-1]%CHESSBOARD_LEN))){
+//         return score;
+//     }
 
-    action_t prob_actions[MAX_KILLER_ACTIONS_IN_ONE_STEP]={0};
-    get_prob_actions_for_killer(state->chessboard,prob_actions,player);
+//     action_t prob_actions[MAX_KILLER_ACTIONS_IN_ONE_STEP]={0};
+//     get_prob_actions_for_killer(state->chessboard,prob_actions,player);
 
-    if (is_max)
-    {
-        value_t max_value=INT64_MIN;
-        for (size_t i = 0; i < MAX_KILLER_ACTIONS_IN_ONE_STEP && prob_actions[i]!=NULL_ACTION; i++)
-        {
-            do_action(state,prob_actions[i]);
-            value_t temp_value=alpha_beta_search_for_killer(depth-1,state,alpha,beta,false,player);
-            undo_action(state);
-            max_value=MAX(max_value,temp_value);
-            alpha=MAX(alpha,temp_value);
-            if (beta<=alpha)
-            {
-                break;
-            }
+//     if (is_max)
+//     {
+//         value_t max_value=INT64_MIN;
+//         for (size_t i = 0; i < MAX_KILLER_ACTIONS_IN_ONE_STEP && prob_actions[i]!=NULL_ACTION; i++)
+//         {
+//             do_action(state,prob_actions[i]);
+//             value_t temp_value=alpha_beta_search_for_killer(depth-1,state,alpha,beta,false,player);
+//             undo_action(state);
+//             max_value=MAX(max_value,temp_value);
+//             alpha=MAX(alpha,temp_value);
+//             if (beta<=alpha)
+//             {
+//                 break;
+//             }
             
-        }
+//         }
 
-        return max_value;
+//         return max_value;
         
-    }
-    else
-    {
-        value_t min_value=INT64_MAX;
-        for (size_t i = 0; i < MAX_KILLER_ACTIONS_IN_ONE_STEP && prob_actions[i]!=NULL_ACTION; i++)
-        {
-            do_action(state,prob_actions[i]);
-            value_t temp_value=alpha_beta_search_for_killer(depth-1,state,alpha,beta,true,player);
-            undo_action(state);
-            min_value=MIN(min_value,temp_value);
-            beta=MIN(beta,temp_value);
-            if (beta<=alpha)
-            {
-                break;
-            }
+//     }
+//     else
+//     {
+//         value_t min_value=INT64_MAX;
+//         for (size_t i = 0; i < MAX_KILLER_ACTIONS_IN_ONE_STEP && prob_actions[i]!=NULL_ACTION; i++)
+//         {
+//             do_action(state,prob_actions[i]);
+//             value_t temp_value=alpha_beta_search_for_killer(depth-1,state,alpha,beta,true,player);
+//             undo_action(state);
+//             min_value=MIN(min_value,temp_value);
+//             beta=MIN(beta,temp_value);
+//             if (beta<=alpha)
+//             {
+//                 break;
+//             }
 
-        }
+//         }
 
-        return min_value;
+//         return min_value;
         
-    }
+//     }
     
     
-}
+// }
 
 
 
@@ -295,38 +362,38 @@ action_t choose_action_with_iterative_deepening(State* state, player_t player){
     
 }
 
-action_t choose_action_with_iterative_deepening_for_killer(State* state, player_t player){
-    value_t best_score=INT64_MIN;
-    action_t best_action=NULL_ACTION;
-    action_t prob_actions[MAX_KILLER_ACTIONS_IN_ONE_STEP]={0};
-    get_prob_actions_for_killer(state->chessboard,prob_actions,player);
+// action_t choose_action_with_iterative_deepening_for_killer(State* state, player_t player){
+//     value_t best_score=INT64_MIN;
+//     action_t best_action=NULL_ACTION;
+//     action_t prob_actions[MAX_KILLER_ACTIONS_IN_ONE_STEP]={0};
+//     // get_prob_actions_for_killer(state->chessboard,prob_actions,player);
 
-    for (size_t depth = 2; depth <= MAX_KILLER_SEARCH_DEPTH; depth+=2)
-    {
-        for (size_t i = 0; i < MAX_KILLER_ACTIONS_IN_ONE_STEP; i++)
-        {
-            do_action(state,prob_actions[i]);
-            value_t temp_score=alpha_beta_search_for_killer(depth-1,state,INT64_MIN,INT64_MAX,false,player);
-            undo_action(state);
+//     for (size_t depth = 2; depth <= MAX_KILLER_SEARCH_DEPTH; depth+=2)
+//     {
+//         for (size_t i = 0; i < MAX_KILLER_ACTIONS_IN_ONE_STEP; i++)
+//         {
+//             do_action(state,prob_actions[i]);
+//             value_t temp_score=alpha_beta_search_for_killer(depth-1,state,INT64_MIN,INT64_MAX,false,player);
+//             undo_action(state);
 
-            if (temp_score>=five)
-            {
-                return prob_actions[i];
-            }
+//             if (temp_score>=five)
+//             {
+//                 return prob_actions[i];
+//             }
             
 
-            if (depth==MAX_KILLER_SEARCH_DEPTH && temp_score>best_score)
-            {
-                best_score=temp_score;
-                best_action=(best_action>=five?(prob_actions[i]):(NULL_ACTION));
-            }
+//             if (depth==MAX_KILLER_SEARCH_DEPTH && temp_score>best_score)
+//             {
+//                 best_score=temp_score;
+//                 best_action=(best_action>=five?(prob_actions[i]):(NULL_ACTION));
+//             }
 
-        }
-    }
+//         }
+//     }
 
-    return best_action;
+//     return best_action;
     
-}
+// }
 
 
 
@@ -428,16 +495,16 @@ action_t choose_action_with_iterative_deepening_with_ssboard(State* state, Score
     
 }
 
-action_t choose_action_sum(State* state, player_t player){
-    action_t action=NULL_ACTION;
-    action=choose_action_with_iterative_deepening_for_killer(state,player);
-    if (action==NULL_ACTION)
-    {
-        action=choose_action_with_iterative_deepening(state,player);
-    }
+// action_t choose_action_sum(State* state, player_t player){
+//     action_t action=NULL_ACTION;
+//     action=choose_action_with_iterative_deepening_for_killer(state,player);
+//     if (action==NULL_ACTION)
+//     {
+//         action=choose_action_with_iterative_deepening(state,player);
+//     }
     
-    return action;
-}
+//     return action;
+// }
 
 
 #pragma region multi-thread
@@ -446,7 +513,9 @@ action_t choose_action_with_iterative_deepening_and_thread(State* state, player_
     value_t best_score=INT64_MIN;
     action_t best_action=NULL_ACTION;
     action_t prob_actions[MAX_ACTIONS_IN_ONE_STEP]={0};
-    get_prob_actions(state->chessboard,prob_actions,player);
+    chess_shape_t prob_shapes[MAX_ACTIONS_IN_ONE_STEP][2]={0};
+    // get_prob_actions(state->chessboard,prob_actions,player);
+    get_prob_actions_and_shape(state->chessboard,prob_actions,prob_shapes,player);
     value_t score_table[MAX_ACTIONS_IN_ONE_STEP]={0};
     SearchArgs* args[MAX_ACTIONS_IN_ONE_STEP]={0};
 
@@ -468,15 +537,6 @@ action_t choose_action_with_iterative_deepening_and_thread(State* state, player_
         args[i]->action=prob_actions[i];
         args[i]->depth=0;
     }
-    
-
-    // for (size_t i = 0; i < MAX_ACTIONS_IN_ONE_STEP; i++)
-    // {
-    //     print_action(prob_actions[i]);
-    //     printf(" ");
-    // }
-    // printf("\n");
-    
 
     for (size_t depth = 2; depth <= MAX_SEARCH_DEPTH; depth+=2)
     {
@@ -486,8 +546,17 @@ action_t choose_action_with_iterative_deepening_and_thread(State* state, player_
         thread_pool->task_finished_num_target=thread_pool->task_finished_num_target+valid_actions_num;
         pthread_mutex_unlock(&thread_pool->lock);
         
+
+
+        
         for (size_t i = 0; i < valid_actions_num; i++)
         {
+
+            if (GET_SHAPE_S(prob_shapes[i][player==BLACK?0:1],FOUR_HALF_S)!=0&&!GET_TF_S(prob_shapes[i][player==BLACK?0:1]))
+            {
+                depth+=2;
+            }
+
             args[i]->depth=depth;
             push_task(thread_pool,search_one_step_with_thread,args[i]);
         }
@@ -534,6 +603,10 @@ void search_one_step_with_thread(void* args){
     *(search_args->score)=alpha_beta_search(search_args->depth-1,search_args->state,INT64_MIN,INT64_MAX,false,search_args->player);
     undo_action(search_args->state);
 }
+
+
+
+
 
 #pragma endregion
 
