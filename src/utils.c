@@ -80,8 +80,16 @@ hash_t update_hash(hash_t hash_current, hash_t hash_board[CHESSBOARD_LEN][CHESSB
     return hash_current ^ hash_board[action/CHESSBOARD_LEN][action%CHESSBOARD_LEN][player==WHITE?1:0];
 }
 
-void store_history_to_file(action_t action, FILE* fp){
+void store_history_to_file_a_step(action_t action, FILE* fp){
     fprintf(fp, "%c%d\n", 'A'+(action%CHESSBOARD_LEN), CHESSBOARD_LEN-action/CHESSBOARD_LEN);
+}
+
+void store_history_to_file(State* state, FILE* fp){
+    for (size_t i = 0; i < state->history_actions_num; i++)
+    {
+        store_history_to_file_a_step(state->history_actions[i],fp);
+    }
+    
 }
 
 void restore_history_from_file(FILE* fp, State* state){

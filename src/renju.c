@@ -4,7 +4,7 @@
 #include <wchar.h>
 #include <locale.h>
 #include <ctype.h>
-#include <signal.h>
+#include <time.h>
 #include "global.h"
 #include "renju.h"
 #include "state.h"
@@ -16,6 +16,8 @@
 
 const int i_direction[8]={1,-1,0,0,1,-1,1,-1};
 const int j_direction[8]={0,0,1,-1,1,-1,-1,1};
+State* now_state=NULL;
+int mode_g=-1;
 
 const wchar_t TAB_LU[]=L"©°";
 const wchar_t TAB_RU[]=L"©´";
@@ -42,7 +44,6 @@ const char RENJU_BANNER[]=
 
 int main(int argc, char const *argv[])
 {
-    signal(SIG_SAVE,signal_handle);
 #ifdef __linux__
     setlocale(LC_CTYPE, "zh_CN.GBK");
 #elif defined(_WIN32)
@@ -51,12 +52,14 @@ int main(int argc, char const *argv[])
 
     while (true)
     {
+        now_state=NULL;
         int mode_choice=-1;
         char ch;
         printf("%s\n", RENJU_BANNER);
         printf("1.pvp\n2.pve(black ai)\n3.pve(white ai)\n4.quit\n");
         scanf("%d",&mode_choice);
         while((ch = getchar()) != '\n' && ch != EOF);
+        mode_g=mode_choice;
         switch (mode_choice)
         {
         case 1:
@@ -144,8 +147,24 @@ bool get_move_input(int* i, int* j){
         printf("save game.\n");
         while((ch = getchar()) != '\n' && ch != EOF);//clear the buffer
         // save
-        raise(SIG_SAVE);
-        // maybe use signal
+        FILE* fp=fopen("history.txt","w");
+        store_history_to_file(now_state,fp);
+        fclose(fp);
+        result=false;
+    }
+    else if (ch=='R')
+    {
+        printf("Retract a chess move.\n");
+        while((ch = getchar()) != '\n' && ch != EOF);
+        if (mode_g==1)
+        {
+            undo_action(now_state);
+        }
+        else if ((mode_g==2||mode_g==3)&&now_state->history_actions_num>=2)
+        {
+            undo_action(now_state);
+            undo_action(now_state);
+        }
         result=false;
     }
     else if (ch>='A'&&ch<='O')
@@ -189,22 +208,12 @@ bool check_move_input_is_valid(player_t chessboard_data[15][15],int i,int j){
     
 }
 
-void signal_handle(int signum){
-    switch (signum)
-    {
-    case SIG_SAVE:
-        printf("yes");//something
-        break;
-    
-    default:
-        break;
-    }
-}
 
 void human_vs_human(){
     printf("\x1b[0m\x1b[1;32mHuman vs Human mode.\n\x1b[0m");
     printf("%ls is black and %ls is white.\n",BLACK_STR,WHITE_STR);
     State* board_state=init_state();
+    now_state=board_state;
     bool input_state=true;
     int i_input,j_input;
     int is_winner_state=0;
@@ -305,6 +314,7 @@ void human_vs_black_ai(){
     printf("\x1b[0m\x1b[1;32mHuman vs AI (black) mode.\n\x1b[0m");
     printf("%ls is black and %ls is white.\n",BLACK_STR,WHITE_STR);
     State* board_state=init_state();
+    now_state=board_state;
     // ScoreShapeBoard* ssboard=init_score_shape_board();
     ThreadPool* pool=init_thread_pool(MAX_ACTIONS_IN_ONE_STEP);
     bool input_state=true;
@@ -315,6 +325,8 @@ void human_vs_black_ai(){
 
         display_board(board_state->chessboard,(board_state->history_actions_num-2>=0)?(board_state->history_actions[board_state->history_actions_num-2]):(NULL_ACTION),(board_state->history_actions_num-1>=0)?(board_state->history_actions[board_state->history_actions_num-1]):(NULL_ACTION));
         printf("Round %d:black's (%ls %ls) turn.\n",board_state->history_actions_num/2+1,BLACK_STR,BLACK_LAST_STR);
+        clock_t start_clock,end_clock;
+        start_clock=clock();
         if (board_state->history_actions_num==0)
         {
             i_input=CHESSBOARD_LEN/2;
@@ -330,9 +342,16 @@ void human_vs_black_ai(){
             i_input=ai_action/CHESSBOARD_LEN;
             j_input=ai_action%CHESSBOARD_LEN;
         }
+        end_clock=clock();
         do_action(board_state,i_input*CHESSBOARD_LEN+j_input);
         // do_action_and_update(board_state,i_input*CHESSBOARD_LEN+j_input,ssboard);
+#ifdef __linux__
+        system("clear");
+#elif defined(_WIN32)
+        system("cls");
+#endif
         printf("AI move: %c%d\n",'A'+j_input,15-i_input);
+        printf("Time used: %f seconds.\n",(double)(end_clock-start_clock)/CLOCKS_PER_SEC);
         is_winner_state=is_winner(board_state->chessboard,OPS_PLAYER(board_state->current_player),board_state->history_actions[board_state->history_actions_num-1]/CHESSBOARD_LEN,board_state->history_actions[board_state->history_actions_num-1]%CHESSBOARD_LEN);
         if (is_winner_state==2)
         {
@@ -360,13 +379,22 @@ void human_vs_black_ai(){
             printf("Round %d:white's (%ls %ls) turn.\n",board_state->history_actions_num/2+1,WHITE_STR,WHITE_LAST_STR);
             printf("Please input the position of your chess piece, such as 'a1' or 'A1'.\n");
             // printf("value: %" PRId64 "\n",evaluate_whole_board(board_state->chessboard,board_state->current_player));
+            clock_t start_clock,end_clock;
+            start_clock=clock();
             input_state=get_move_input(&i_input,&j_input);
+            end_clock=clock();
             if (input_state)
             {
                 input_state=check_move_input_is_valid(board_state->chessboard,i_input,j_input);
                 if (input_state)
                 {
                     do_action(board_state,i_input*CHESSBOARD_LEN+j_input);
+#ifdef __linux__
+                    system("clear");
+#elif defined(_WIN32)
+                    system("cls");
+#endif              
+                    printf("Time used: %f seconds.\n",(double)(end_clock-start_clock)/CLOCKS_PER_SEC);
                     // do_action_and_update(board_state,i_input*CHESSBOARD_LEN+j_input,ssboard);
                     is_winner_state=is_winner(board_state->chessboard,OPS_PLAYER(board_state->current_player),board_state->history_actions[board_state->history_actions_num-1]/CHESSBOARD_LEN,board_state->history_actions[board_state->history_actions_num-1]%CHESSBOARD_LEN);
                     if (is_winner_state)
@@ -407,6 +435,7 @@ void human_vs_white_ai(){
     printf("\x1b[0m\x1b[1;32mHuman vs AI (white) mode.\n\x1b[0m");
     printf("%ls is black and %ls is white.\n",BLACK_STR,WHITE_STR);
     State* board_state=init_state();
+    now_state=board_state;
     ThreadPool* pool=init_thread_pool(MAX_ACTIONS_IN_ONE_STEP);
     bool input_state=true;
     int i_input,j_input;
@@ -419,13 +448,22 @@ void human_vs_white_ai(){
             display_board(board_state->chessboard,(board_state->history_actions_num-2>=0)?(board_state->history_actions[board_state->history_actions_num-2]):(NULL_ACTION),(board_state->history_actions_num-1>=0)?(board_state->history_actions[board_state->history_actions_num-1]):(NULL_ACTION));
             printf("Round %d:black's (%ls %ls) turn.\n",board_state->history_actions_num/2+1,BLACK_STR,BLACK_LAST_STR);
             printf("Please input the position of your chess piece, such as 'a1' or 'A1'.\n");
+            clock_t start_clock,end_clock;
+            start_clock=clock();
             input_state=get_move_input(&i_input,&j_input);
+            end_clock=clock();
             if (input_state)
             {
                 input_state=check_move_input_is_valid(board_state->chessboard,i_input,j_input);
                 if (input_state)
                 {
                     do_action(board_state,i_input*CHESSBOARD_LEN+j_input);
+#ifdef __linux__
+                    system("clear");
+#elif defined(_WIN32)
+                    system("cls");
+#endif              
+                    printf("Time used: %f seconds.\n",(double)(end_clock-start_clock)/CLOCKS_PER_SEC);
                     is_winner_state=is_winner(board_state->chessboard,OPS_PLAYER(board_state->current_player),board_state->history_actions[board_state->history_actions_num-1]/CHESSBOARD_LEN,board_state->history_actions[board_state->history_actions_num-1]%CHESSBOARD_LEN);
                     if (is_winner_state==2)
                     {
@@ -463,17 +501,37 @@ void human_vs_white_ai(){
         printf("Round %d:white's (%ls %ls) turn.\n",board_state->history_actions_num/2+1,WHITE_STR,WHITE_LAST_STR);
 
         // evaluate_board(board_state->chessboard,WHITE,score_board);
-        // choose_max_score_pos(score_board,&i_input,&j_input);
+        // choose_max_score_pos(score_board,&i_input,&j_input);c
 
         // action_t ai_action=choose_action(board_state,WHITE);
         // action_t ai_action=choose_action_with_iterative_deepening(board_state,WHITE);
         // action_t ai_action=choose_action_sum(board_state,WHITE);
-        action_t ai_action=choose_action_with_iterative_deepening_and_thread(board_state,WHITE,pool);
+        clock_t start_clock,end_clock;
+        start_clock=clock();
+        action_t ai_action=NULL_ACTION;
+        if (board_state->history_actions_num==1)
+        {
+            ai_action=board_state->history_actions[board_state->history_actions_num-1]-CHESSBOARD_LEN-1;
+            
+        }
+        else
+        {
+            ai_action=choose_action_with_iterative_deepening_and_thread(board_state,WHITE,pool);
+        }
+        
+        
         i_input=ai_action/CHESSBOARD_LEN;
         j_input=ai_action%CHESSBOARD_LEN;
+        end_clock=clock();
 
         do_action(board_state,i_input*CHESSBOARD_LEN+j_input);
+#ifdef __linux__
+        system("clear");
+#elif defined(_WIN32)
+        system("cls");
+#endif
         printf("AI move: %c%d\n",'A'+j_input,15-i_input);
+        printf("Time used: %f seconds.\n",(double)(end_clock-start_clock)/CLOCKS_PER_SEC);
         is_winner_state=is_winner(board_state->chessboard,OPS_PLAYER(board_state->current_player),board_state->history_actions[board_state->history_actions_num-1]/CHESSBOARD_LEN,board_state->history_actions[board_state->history_actions_num-1]%CHESSBOARD_LEN);
         if (is_winner_state)
         {

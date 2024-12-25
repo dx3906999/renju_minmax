@@ -9,16 +9,6 @@
 #include <inttypes.h>
 
 
-// enum CHESS_VALUE {
-//     forbidden = 0,
-//     five = 10000000,
-//     four_open = 900000,
-//     four_half = 100000,
-//     three_open = 70000,
-//     three_half = 10000,
-//     two_open = 1000,
-//     two_half = 100,
-// };
 
 
 value_t evaluate_chess_shape(player_t player, chess_shape_t chess_shape){
@@ -371,6 +361,8 @@ void choose_max_score_pos(value_t score_board_output[CHESSBOARD_LEN][CHESSBOARD_
     }
 }
 
+// ∆˙”√
+#pragma region ScoreShapeBoard
 
 void update_score_shape_board(ScoreShapeBoard* score_shape_board, player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_LEN], action_t action){
     int i_action=action/CHESSBOARD_LEN;
@@ -553,5 +545,5 @@ ScoreShapeBoard* init_score_shape_board(){
     
 }
 
-//TODO: À„…±
+#pragma endregion
 

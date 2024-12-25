@@ -4,14 +4,6 @@
 #include "global.h"
 #include "renju.h"
 
-// typedef enum chess_shape_state_t{
-//     TOOLONG=1,
-//     FIVE,
-//     FOUR_FAKE,
-//     FOUR_REAL,
-//     THREE_FAKE,
-//     THREE_REAL
-// }chess_shape_state_t;
 
 
 #ifdef REFEREE_DEBUG
@@ -50,26 +42,6 @@ chess_shape_t is_banned(player_t chessboard[15][15],int i,int j,int h_direction_
         chess_shape_sum+=chess_shape_state[h_direction];
     }
     
-    /* if (GET_SHAPE_S(chess_shape_sum,FIVE_S))// 得和一般的区分？
-    {
-        return false;
-    }
-    else if (GET_SHAPE_S(chess_shape_sum,OVERLINE_S))
-    {
-        return (h_direction_last==-1)?(true):chess_shape_state[h_direction_last];
-    }
-    else if (GET_SHAPE_S(chess_shape_sum,FOUR_HALF_S)+GET_SHAPE_S(chess_shape_sum,FOUR_OPEN_S)>=2)
-    {
-        return (h_direction_last==-1)?(true):chess_shape_state[h_direction_last];
-    }
-    else if (GET_SHAPE_S(chess_shape_sum,THREE_OPEN_S)>=2)
-    {
-        return (h_direction_last==-1)?(true):chess_shape_state[h_direction_last];
-    }
-    else
-    {
-        return false;
-    } */
     
     if (h_direction_last==-1)
     {
@@ -532,64 +504,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                 chessboard[i][j]=temp_chess;
 
                 //TODO:TWO
-                // if (player==BLACK)
-                // {
-                //     // ^ 有必要吗
-                //     chessboard[i][j]=player;
-                //     if (chess_state[h_direction*2][1]>0&&chess_state[h_direction*2+1][1]>0)
-                //     {
-                //         advanced_chess_shape=is_banned(chessboard,i+i_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),j+j_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),h_direction);
-                //         if (GET_SHAPE_S(advanced_chess_shape,THREE_OPEN_S)&&(!GET_TF_S(advanced_chess_shape)))
-                //         {
-                //             chess_shape_state[h_direction]+=TWO_OPEN_S;
-                //             goto case_2_end;
-                //         }
-                //         else if (GET_SHAPE_S(advanced_chess_shape,THREE_HALF_S)&&(!GET_TF_S(advanced_chess_shape)))
-                //         {
-                //             chess_shape_state[h_direction]+=TWO_HALF_S;
-                //             goto case_2_end;
-                //         }
-                        
-                //         advanced_chess_shape=is_banned(chessboard,i+i_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),j+j_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),h_direction);
-                //         if (GET_SHAPE_S(advanced_chess_shape,THREE_OPEN_S)&&(!GET_TF_S(advanced_chess_shape)))
-                //         {
-                //             chess_shape_state[h_direction]+=TWO_OPEN_S;
-                //             goto case_2_end;
-                //         }
-                //         else if (GET_SHAPE_S(advanced_chess_shape,THREE_HALF_S)&&(!GET_TF_S(advanced_chess_shape)))
-                //         {
-                //             chess_shape_state[h_direction]+=TWO_HALF_S;
-                //             goto case_2_end;
-                //         }
-                        
-                //     }
-                //     else if (chess_state[h_direction*2][1]>0&&chess_state[h_direction*2+1][1]==-1&&!is_banned(chessboard,i+i_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),j+j_direction[h_direction*2]*(chess_state[h_direction*2][0]+1),-1))
-                //     {
-                //         chess_shape_state[h_direction]+=TWO_HALF_S;
-                //         goto case_2_end;
-                //     }
-                //     else if (chess_state[h_direction*2][1]==-1&&chess_state[h_direction*2+1][1]>0&&!is_banned(chessboard,i+i_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),j+j_direction[h_direction*2+1]*(chess_state[h_direction*2+1][0]+1),-1))
-                //     {
-                //         chess_shape_state[h_direction]+=TWO_HALF_S;
-                //         goto case_2_end;
-                //     }
-                    
-                    
-                    
-                // }
-                // else
-                // {
-                //     if (chess_state[h_direction*2][1]>0&&chess_state[h_direction*2+1][1]>0)
-                //     {
-                //         chess_shape_state[h_direction]+=TWO_OPEN_S;
-                //     }
-                //     else if ((chess_state[h_direction*2][1]>=1&&chess_state[h_direction*2+1][1]==-1)||(chess_state[h_direction*2][1]==-1&&chess_state[h_direction*2+1][1]>=1))
-                //     {
-                //         chess_shape_state[h_direction]+=TWO_HALF_S;
-                //     }
-                    
-                    
-                // }
+                
 
                 if (chess_state[h_direction*2][1]>0&&chess_state[h_direction*2+1][1]>0)
                 {
@@ -657,7 +572,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                     
                 }
                 
-                //TODO: 跳三判断
+                
 
                 if (player==BLACK)
                 {
@@ -723,7 +638,7 @@ void analyze_chess_state(int chess_state[8][15],chess_shape_t chess_shape_state[
                 
                 //^ 跳2判断
 
-                //^ 先不给分看看
+                //^ 不给分
                 if (chess_state[h_direction*2][1]==1&&chess_state[h_direction*2][2]==1)
                 {
                     if ((chess_state[h_direction*2][3]<0&&chess_state[h_direction*2+1][1]>0)||(chess_state[h_direction*2][3]>0&&chess_state[h_direction*2+1][1]<0))

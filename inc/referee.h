@@ -31,15 +31,6 @@ extern "C" {
 #define IS_IN_CHESSBOARD(i,j,k,direction) ((i)+i_direction[(direction)]*(k)>=0 && (i)+i_direction[(direction)]*(k)<15 && (j)+j_direction[(direction)]*(k)>=0 && (j)+j_direction[(direction)]*(k)<15)
 #define THE_CHESS(chessboard,i,j,k,direction) ((chessboard)[(i)+i_direction[(direction)]*(k)][(j)+j_direction[(direction)]*(k)])
 
-// typedef struct chess_shape_t
-// {
-//     int overline;
-//     int five;
-//     int four_half;
-//     int four_open;
-//     int three_half;
-//     int three_open;
-// }chess_shape_t;
  
 typedef uint64_t chess_shape_t;
 
