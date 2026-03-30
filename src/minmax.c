@@ -87,7 +87,7 @@ void get_prob_actions_and_shape(player_t chessboard[CHESSBOARD_LEN][CHESSBOARD_L
 
 
 
-// ÆúÓÃ
+// ï¿½ï¿½ï¿½ï¿½
 void get_prob_actions_from_ssboard(ScoreShapeBoard* ssboard, action_t prob_actions_output[MAX_ACTIONS_IN_ONE_STEP], player_t player){
     HeapNode heap[MAX_ACTIONS_IN_ONE_STEP]={0};
     // value_t score_board[CHESSBOARD_LEN][CHESSBOARD_LEN]={0};
@@ -358,6 +358,18 @@ action_t choose_action_with_iterative_deepening_with_ssboard(State* state, Score
 
 #pragma region multi-thread
 
+static void free_search_args(SearchArgs* args[MAX_ACTIONS_IN_ONE_STEP], size_t valid_actions_num){
+    for (size_t i = 0; i < valid_actions_num; i++)
+    {
+        if (args[i] != NULL)
+        {
+            free(args[i]->state);
+            free(args[i]);
+            args[i] = NULL;
+        }
+    }
+}
+
 action_t choose_action_with_iterative_deepening_and_thread(State* state, player_t player, ThreadPool* thread_pool){
     value_t best_score=INT64_MIN;
     action_t best_action=NULL_ACTION;
@@ -392,7 +404,7 @@ action_t choose_action_with_iterative_deepening_and_thread(State* state, player_
         memset(score_table,1,sizeof(score_table));
         
         pthread_mutex_lock(&thread_pool->lock);
-        thread_pool->task_finished_num_target=thread_pool->task_finished_num_target+valid_actions_num;
+        thread_pool->task_finished_num_target = thread_pool->task_finished_num + valid_actions_num;
         pthread_mutex_unlock(&thread_pool->lock);
         
 
@@ -401,19 +413,26 @@ action_t choose_action_with_iterative_deepening_and_thread(State* state, player_
         for (size_t i = 0; i < valid_actions_num; i++)
         {
 
+            int search_depth = (int)depth;
             if (GET_SHAPE_S(prob_shapes[i][player==BLACK?0:1],FOUR_HALF_S)!=0&&!GET_TF_S(prob_shapes[i][player==BLACK?0:1]))
             {
-                depth+=2;
+                search_depth += 2;
             }
 
-            args[i]->depth=depth;
-            push_task(thread_pool,search_one_step_with_thread,args[i]);
+            args[i]->depth = search_depth;
+            if (!push_task(thread_pool,search_one_step_with_thread,args[i]))
+            {
+                pthread_mutex_lock(&thread_pool->lock);
+                thread_pool->task_finished_num_target--;
+                pthread_mutex_unlock(&thread_pool->lock);
+                score_table[i] = INT64_MIN;
+            }
         }
 
         // wait for all tasks to finish
 
         pthread_mutex_lock(&thread_pool->lock);
-        while (thread_pool->task_finished_num!=thread_pool->task_finished_num_target)
+        while (thread_pool->task_finished_num < thread_pool->task_finished_num_target)
         {
             pthread_cond_wait(&(thread_pool->task_done), &(thread_pool->lock));
         }
@@ -423,6 +442,7 @@ action_t choose_action_with_iterative_deepening_and_thread(State* state, player_
         {
             if (score_table[i]>five||((GET_SHAPE_S(prob_shapes[i][player==BLACK?0:1],FOUR_OPEN_S)||GET_SHAPE_S(prob_shapes[i][player==BLACK?0:1],FIVE_S)||GET_SHAPE_S(prob_shapes[i][player==BLACK?0:1],OVERLINE_S))&&!GET_TF_S(prob_shapes[i][player==BLACK?0:1])))
             {
+                free_search_args(args,valid_actions_num);
                 return prob_actions[i];
             }
             
@@ -441,6 +461,7 @@ action_t choose_action_with_iterative_deepening_and_thread(State* state, player_
     }
     
 
+    free_search_args(args,valid_actions_num);
     return best_action;
     
 }
@@ -458,5 +479,3 @@ void search_one_step_with_thread(void* args){
 
 
 #pragma endregion
-
-
