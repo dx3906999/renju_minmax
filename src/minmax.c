@@ -361,11 +361,11 @@ action_t choose_action_with_iterative_deepening_with_ssboard(State* state, Score
 static void free_search_args(SearchArgs* args[MAX_ACTIONS_IN_ONE_STEP], size_t valid_actions_num){
     for (size_t i = 0; i < valid_actions_num; i++)
     {
-        if (args[i]!=NULL)
+        if (args[i] != NULL)
         {
             free(args[i]->state);
             free(args[i]);
-            args[i]=NULL;
+            args[i] = NULL;
         }
     }
 }
@@ -404,7 +404,7 @@ action_t choose_action_with_iterative_deepening_and_thread(State* state, player_
         memset(score_table,1,sizeof(score_table));
         
         pthread_mutex_lock(&thread_pool->lock);
-        thread_pool->task_finished_num_target=thread_pool->task_finished_num+valid_actions_num;
+        thread_pool->task_finished_num_target = thread_pool->task_finished_num + valid_actions_num;
         pthread_mutex_unlock(&thread_pool->lock);
         
 
@@ -413,26 +413,26 @@ action_t choose_action_with_iterative_deepening_and_thread(State* state, player_
         for (size_t i = 0; i < valid_actions_num; i++)
         {
 
-            int search_depth=(int)depth;
+            int search_depth = (int)depth;
             if (GET_SHAPE_S(prob_shapes[i][player==BLACK?0:1],FOUR_HALF_S)!=0&&!GET_TF_S(prob_shapes[i][player==BLACK?0:1]))
             {
-                search_depth+=2;
+                search_depth += 2;
             }
 
-            args[i]->depth=search_depth;
+            args[i]->depth = search_depth;
             if (!push_task(thread_pool,search_one_step_with_thread,args[i]))
             {
                 pthread_mutex_lock(&thread_pool->lock);
                 thread_pool->task_finished_num_target--;
                 pthread_mutex_unlock(&thread_pool->lock);
-                score_table[i]=INT64_MIN;
+                score_table[i] = INT64_MIN;
             }
         }
 
         // wait for all tasks to finish
 
         pthread_mutex_lock(&thread_pool->lock);
-        while (thread_pool->task_finished_num<thread_pool->task_finished_num_target)
+        while (thread_pool->task_finished_num < thread_pool->task_finished_num_target)
         {
             pthread_cond_wait(&(thread_pool->task_done), &(thread_pool->lock));
         }
